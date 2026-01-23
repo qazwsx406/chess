@@ -59,17 +59,23 @@ public class ChessPiece {
 
         switch (type) {
             case KING:
-                return List.of();
+                break;
             case QUEEN:
                 break;
             case BISHOP:
+                // diagonal moves
                 addMovesInDirection(moves, board, myPosition, 1, 1);
                 addMovesInDirection(moves, board, myPosition, 1, -1);
                 addMovesInDirection(moves, board, myPosition, -1, 1);
                 addMovesInDirection(moves, board, myPosition, -1, -1);
                 break;
             case ROOK:
-                return List.of();
+                // cross moves
+                addMovesInDirection(moves, board, myPosition, 0, 1);
+                addMovesInDirection(moves, board, myPosition, 0, -1);
+                addMovesInDirection(moves, board, myPosition, 1, 0);
+                addMovesInDirection(moves, board, myPosition, -1, 0);
+                break;
             case KNIGHT:
                 return List.of();
             case PAWN:
