@@ -59,6 +59,16 @@ public class ChessPiece {
 
         switch (type) {
             case KING:
+                // diagonal single move
+                singleMoveInDirection(moves, board, myPosition, 1, 1);
+                singleMoveInDirection(moves, board, myPosition, 1, -1);
+                singleMoveInDirection(moves, board, myPosition, -1, 1);
+                singleMoveInDirection(moves, board, myPosition, -1, -1);
+                // cross single move
+                singleMoveInDirection(moves, board, myPosition, 0, 1);
+                singleMoveInDirection(moves, board, myPosition, 0, -1);
+                singleMoveInDirection(moves, board, myPosition, 1, 0);
+                singleMoveInDirection(moves, board, myPosition, -1, 0);
                 break;
             case QUEEN:
                 // diagonal moves
@@ -92,6 +102,24 @@ public class ChessPiece {
                 return List.of();
         }
         return moves;
+    }
+
+    private void singleMoveInDirection(Collection<ChessMove> moves, ChessBoard board, ChessPosition startPosition, int rowShift, int colShift) {
+        int checkRow = startPosition.getRow() + rowShift;
+        int checkCol = startPosition.getColumn() + colShift;
+
+        if (checkRow < 1 || checkRow > 8 || checkCol < 1 || checkCol > 8) return;
+
+        ChessPosition newPosition = new ChessPosition(checkRow, checkCol);
+        ChessPiece pieceAtPosition = board.getPiece(newPosition);
+
+        if (pieceAtPosition == null) {
+            moves.add(new ChessMove(startPosition, newPosition, null));
+        } else {
+            if (pieceAtPosition.getTeamColor() != this.pieceColor) {
+                moves.add(new ChessMove(startPosition, newPosition, null));
+            }
+        }
     }
 
     private void addMovesInDirection(Collection<ChessMove> moves, ChessBoard board, ChessPosition startPosition, int rowShift, int colShift) {
