@@ -61,6 +61,16 @@ public class ChessPiece {
             case KING:
                 break;
             case QUEEN:
+                // diagonal moves
+                addMovesInDirection(moves, board, myPosition, 1, 1);
+                addMovesInDirection(moves, board, myPosition, 1, -1);
+                addMovesInDirection(moves, board, myPosition, -1, 1);
+                addMovesInDirection(moves, board, myPosition, -1, -1);
+                // cross moves
+                addMovesInDirection(moves, board, myPosition, 0, 1);
+                addMovesInDirection(moves, board, myPosition, 0, -1);
+                addMovesInDirection(moves, board, myPosition, 1, 0);
+                addMovesInDirection(moves, board, myPosition, -1, 0);
                 break;
             case BISHOP:
                 // diagonal moves
