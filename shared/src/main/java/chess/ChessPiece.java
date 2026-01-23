@@ -1,5 +1,6 @@
 package chess;
 
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 
@@ -53,10 +54,52 @@ public class ChessPiece {
      * @return Collection of valid moves
      */
     public Collection<ChessMove> pieceMoves(ChessBoard board, ChessPosition myPosition) {
-        ChessPiece piece = board.getPiece(myPosition);
-        if (piece.getPieceType() == PieceType.BISHOP) {
-            return List.of(new ChessMove(new ChessPosition()));
+        List<ChessMove> moves = new ArrayList<>();
+
+        switch (type) {
+            case KING:
+                return List.of();
+            case QUEEN:
+                break;
+            case BISHOP:
+                addMovesInDirection(moves, board, myPosition, 1, 1);
+                addMovesInDirection(moves, board, myPosition, 1, -1);
+                addMovesInDirection(moves, board, myPosition, -1, 1);
+                addMovesInDirection(moves, board, myPosition, -1, -1);
+                break;
+            case ROOK:
+                return List.of();
+            case KNIGHT:
+                return List.of();
+            case PAWN:
+                return List.of();
         }
-        return List.of();
+        return moves;
+    }
+
+    private void addMovesInDirection(Collection<ChessMove> moves, ChessBoard board, ChessPosition startPosition, int rowShift, int colShift) {
+        int currentRow = startPosition.getRow();
+        int currentCol = startPosition.getColumn();
+
+        while (true) {
+            currentRow += rowShift;
+            currentCol += colShift;
+
+            if (currentRow < 1 || currentRow > 8 || currentCol < 1 || currentCol > 8) {
+                break;
+            }
+
+            ChessPosition newPosition = new ChessPosition(currentRow, currentCol);
+            ChessPiece pieceAtPosition = board.getPiece(newPosition);
+
+            if (pieceAtPosition == null) {
+                moves.add(new ChessMove(startPosition, newPosition, null));
+            } else {
+                if (pieceAtPosition.getTeamColor() != this.pieceColor) {
+                    moves.add(new ChessMove(startPosition, newPosition, null));
+                }
+                break;
+            }
+        }
     }
 }
