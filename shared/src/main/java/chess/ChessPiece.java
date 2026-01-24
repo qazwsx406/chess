@@ -60,15 +60,15 @@ public class ChessPiece {
         switch (type) {
             case KING:
                 // diagonal single move
-                singleMoveInDirection(moves, board, myPosition, 1, 1, false);
-                singleMoveInDirection(moves, board, myPosition, 1, -1, false);
-                singleMoveInDirection(moves, board, myPosition, -1, 1, false);
-                singleMoveInDirection(moves, board, myPosition, -1, -1, false);
+                singleMoveInDirection(moves, board, myPosition, 1, 1);
+                singleMoveInDirection(moves, board, myPosition, 1, -1);
+                singleMoveInDirection(moves, board, myPosition, -1, 1);
+                singleMoveInDirection(moves, board, myPosition, -1, -1);
                 // cross single move
-                singleMoveInDirection(moves, board, myPosition, 0, 1, false);
-                singleMoveInDirection(moves, board, myPosition, 0, -1, false);
-                singleMoveInDirection(moves, board, myPosition, 1, 0, false);
-                singleMoveInDirection(moves, board, myPosition, -1, 0, false);
+                singleMoveInDirection(moves, board, myPosition, 0, 1);
+                singleMoveInDirection(moves, board, myPosition, 0, -1);
+                singleMoveInDirection(moves, board, myPosition, 1, 0);
+                singleMoveInDirection(moves, board, myPosition, -1, 0);
                 break;
             case QUEEN:
                 // diagonal moves
@@ -97,28 +97,73 @@ public class ChessPiece {
                 addMovesInDirection(moves, board, myPosition, -1, 0);
                 break;
             case KNIGHT:
-                singleMoveInDirection(moves, board, myPosition, 2, 1, false);
-                singleMoveInDirection(moves, board, myPosition, 2, -1, false);
-                singleMoveInDirection(moves, board, myPosition, -2, 1, false);
-                singleMoveInDirection(moves, board, myPosition, -2, -1, false);
-                singleMoveInDirection(moves, board, myPosition, 1, 2, false);
-                singleMoveInDirection(moves, board, myPosition, 1, -2, false);
-                singleMoveInDirection(moves, board, myPosition, -1, 2, false);
-                singleMoveInDirection(moves, board, myPosition, -1, -2, false);
+                singleMoveInDirection(moves, board, myPosition, 2, 1);
+                singleMoveInDirection(moves, board, myPosition, 2, -1);
+                singleMoveInDirection(moves, board, myPosition, -2, 1);
+                singleMoveInDirection(moves, board, myPosition, -2, -1);
+                singleMoveInDirection(moves, board, myPosition, 1, 2);
+                singleMoveInDirection(moves, board, myPosition, 1, -2);
+                singleMoveInDirection(moves, board, myPosition, -1, 2);
+                singleMoveInDirection(moves, board, myPosition, -1, -2);
                 break;
             case PAWN:
-                return List.of();
+                pawnMoves(moves, board, myPosition);
+                break;
         }
         return moves;
     }
 
-    private void pawnMoveInDirection(Collection<ChessMove> moves, ChessBoard board, ChessPosition startPosition, int rowShift, int colShift) {
-        // starting cases
-        if (pieceColor == ChessGame.TeamColor.WHITE && )
+    private void pawnMoves(Collection<ChessMove> moves, ChessBoard board, ChessPosition myPosition) {
+        int direction = (pieceColor == ChessGame.TeamColor.WHITE) ? 1 : -1;
+        int startRow = (pieceColor == ChessGame.TeamColor.WHITE) ? 2 : 7;
+        int promotionRow = (pieceColor == ChessGame.TeamColor.WHITE) ? 8 : 1;
+        int currentRow = myPosition.getRow();
+        int currentCol = myPosition.getColumn();
 
+        ChessPosition oneStep = new ChessPosition(currentRow + direction, currentCol);
+        if (oneStep.getRow() >= 1 && oneStep.getRow() <= 8) {
+            if (board.getPiece(oneStep) == null) {
+                if (oneStep.getRow() == promotionRow) {
+                    addPromotionMoves(moves, myPosition, oneStep);
+                } else {
+                    moves.add(new ChessMove(myPosition, oneStep, null));
+                }
+
+                if (currentRow == startRow) {
+                    ChessPosition twoStep = new ChessPosition(currentRow + 2 * direction, currentCol);
+                    if (board.getPiece(twoStep) == null) {
+                        moves.add(new ChessMove(myPosition, twoStep, null));
+                    }
+                }
+            }
+        }
+
+        int[] captureCols = {currentCol - 1, currentCol + 1};
+        for (int captureCol : captureCols) {
+            if (captureCol >= 1 && captureCol <= 8) {
+                ChessPosition capturePos = new ChessPosition(currentRow + direction, captureCol);
+                if (capturePos.getRow() >= 1 && capturePos.getRow() <= 8) {
+                    ChessPiece targetPiece = board.getPiece(capturePos);
+                    if (targetPiece != null && targetPiece.getTeamColor() != pieceColor) {
+                        if (capturePos.getRow() == promotionRow) {
+                            addPromotionMoves(moves, myPosition, capturePos);
+                        } else {
+                            moves.add(new ChessMove(myPosition, capturePos, null));
+                        }
+                    }
+                }
+            }
+        }
     }
 
-    private void singleMoveInDirection(Collection<ChessMove> moves, ChessBoard board, ChessPosition startPosition, int rowShift, int colShift, boolean checkPawn) {
+    private void addPromotionMoves(Collection<ChessMove> moves, ChessPosition start, ChessPosition end) {
+        moves.add(new ChessMove(start, end, PieceType.QUEEN));
+        moves.add(new ChessMove(start, end, PieceType.ROOK));
+        moves.add(new ChessMove(start, end, PieceType.BISHOP));
+        moves.add(new ChessMove(start, end, PieceType.KNIGHT));
+    }
+
+    private void singleMoveInDirection(Collection<ChessMove> moves, ChessBoard board, ChessPosition startPosition, int rowShift, int colShift) {
         int checkRow = startPosition.getRow() + rowShift;
         int checkCol = startPosition.getColumn() + colShift;
 
@@ -129,14 +174,6 @@ public class ChessPiece {
         ChessPosition newPosition = new ChessPosition(checkRow, checkCol);
         ChessPiece pieceAtPosition = board.getPiece(newPosition);
 
-        // checkPawn true
-        if (pieceAtPosition == null) {
-            moves.add(new ChessMove(startPosition, newPosition, null));
-        } else {
-            if ()
-        }
-
-        // checkPawn false
         if (pieceAtPosition == null) {
             moves.add(new ChessMove(startPosition, newPosition, null));
         } else {
