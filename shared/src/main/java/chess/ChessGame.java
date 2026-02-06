@@ -58,17 +58,11 @@ public class ChessGame {
         for (ChessMove move : availableMoveList) {
             ChessBoard saveBoard = currentBoard;
 
-            try {
-                makeMove(move);
-            } catch (InvalidMoveException e) {
-                throw new RuntimeException(e);
-            }
+            currentBoard.addPiece(move.getEndPosition(), currentBoard.getPiece(move.getStartPosition()));
+            currentBoard.addPiece(move.getStartPosition(), null);
 
-            if (isInCheck(currentTurn)) {
-                currentBoard = saveBoard;
-            } else {
-                validMoveList.add(move);
-            }
+            if (!isInCheck(currentTurn)) validMoveList.add(move);
+            currentBoard = saveBoard;
         }
 
         return validMoveList;
@@ -81,14 +75,20 @@ public class ChessGame {
      * @throws InvalidMoveException if move is invalid
      */
     public void makeMove(ChessMove move) throws InvalidMoveException {
-         currentBoard.addPiece(move.getEndPosition(), currentBoard.getPiece(move.getStartPosition()));
-         currentBoard.addPiece(move.getStartPosition(), null);
+        Collection<ChessMove> validMoves = validMoves(move.getStartPosition());
 
-         if (currentTurn == TeamColor.WHITE) {
-             currentTurn = TeamColor.BLACK;
-         } else {
-             currentTurn = TeamColor.WHITE;
-         }
+        if (validMoves.isEmpty()) throw new InvalidMoveException();
+
+        if (validMoves.contains(move)) {
+            currentBoard.addPiece(move.getEndPosition(), currentBoard.getPiece(move.getStartPosition()));
+            currentBoard.addPiece(move.getStartPosition(), null);
+        }
+
+        if (currentTurn == TeamColor.WHITE) {
+            currentTurn = TeamColor.BLACK;
+        } else {
+            currentTurn = TeamColor.WHITE;
+        }
     }
 
     /**
