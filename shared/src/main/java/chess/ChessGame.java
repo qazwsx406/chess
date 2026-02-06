@@ -105,6 +105,35 @@ public class ChessGame {
         throw new RuntimeException("Not implemented");
     }
 
+    private boolean checkInDirection(ChessPosition kingPosition, ChessPiece threatPiece,int rowShift, int colShift) {
+        int currentRow = kingPosition.getRow();
+        int currentCol = kingPosition.getColumn();
+
+        while (true) {
+            currentRow += rowShift;
+            currentCol += colShift;
+
+            if (currentRow < 1 || currentRow > 8 || currentCol < 1 || currentCol > 8) {
+                break;
+            }
+
+            ChessPosition newPosition = new ChessPosition(currentRow, currentCol);
+            ChessPiece pieceAtPosition = currentBoard.getPiece(newPosition);
+
+            if (pieceAtPosition == threatPiece) return true;
+        }
+        return false;
+    }
+
+    private ChessPosition getKingPosition(TeamColor teamColor) {
+        for (ChessPiece[] row : currentBoard.squares) {
+            for (ChessPiece piece: row) {
+                if (piece.getPieceType() == ChessPiece.PieceType.KING && piece.getTeamColor() == teamColor) return piece;
+            }
+        }
+    }
+
+
     /**
      * Determines if the given team is in stalemate, which here is defined as having
      * no valid moves while not in check.
