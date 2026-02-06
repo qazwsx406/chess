@@ -77,7 +77,7 @@ public class ChessGame {
     public void makeMove(ChessMove move) throws InvalidMoveException {
         Collection<ChessMove> validMoves = validMoves(move.getStartPosition());
 
-        if (validMoves.isEmpty()) throw new InvalidMoveException();
+        if (validMoves == null || validMoves.isEmpty()) throw new InvalidMoveException();
 
         if (validMoves.contains(move)) {
             currentBoard.addPiece(move.getEndPosition(), currentBoard.getPiece(move.getStartPosition()));
