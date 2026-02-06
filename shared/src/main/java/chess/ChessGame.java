@@ -1,6 +1,8 @@
 package chess;
 
+import java.util.Arrays;
 import java.util.Collection;
+import java.util.Objects;
 
 /**
  * For a class that can manage a chess game, making moves on a board
@@ -48,7 +50,7 @@ public class ChessGame {
      * startPosition
      */
     public Collection<ChessMove> validMoves(ChessPosition startPosition) {
-        throw new RuntimeException("Not implemented");
+        return currentBoard.getPiece(startPosition).pieceMoves(currentBoard, startPosition);
     }
 
     /**
@@ -98,7 +100,7 @@ public class ChessGame {
      * @param board the new board to use
      */
     public void setBoard(ChessBoard board) {
-        throw new RuntimeException("Not implemented");
+        currentBoard.resetBoard();
     }
 
     /**
@@ -108,5 +110,19 @@ public class ChessGame {
      */
     public ChessBoard getBoard() {
         return currentBoard;
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        if (this == obj) return true;
+        if (obj == null || getClass() != obj.getClass()) return false;
+        ChessGame that = (ChessGame) obj;
+
+        return Objects.equals(currentTurn, that.currentTurn) && Objects.equals(currentBoard, that.currentBoard);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(currentTurn, currentBoard);
     }
 }
