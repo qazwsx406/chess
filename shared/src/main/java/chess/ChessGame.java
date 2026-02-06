@@ -1,5 +1,6 @@
 package chess;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Objects;
@@ -12,8 +13,8 @@ import java.util.Objects;
  */
 public class ChessGame {
 
-    TeamColor currentTurn = TeamColor.WHITE;
-    ChessBoard currentBoard = new ChessBoard();
+    TeamColor currentTurn;
+    ChessBoard currentBoard;
     public ChessGame() {
 
     }
@@ -50,7 +51,27 @@ public class ChessGame {
      * startPosition
      */
     public Collection<ChessMove> validMoves(ChessPosition startPosition) {
-        return currentBoard.getPiece(startPosition).pieceMoves(currentBoard, startPosition);
+        if (currentBoard.getPiece(startPosition) == null) return null;
+        Collection<ChessMove> availableMoveList = currentBoard.getPiece(startPosition).pieceMoves(currentBoard, startPosition);
+        Collection<ChessMove> validMoveList = new ArrayList<>();
+
+        for (ChessMove move : availableMoveList) {
+            ChessBoard saveBoard = currentBoard;
+
+            try {
+                makeMove(move);
+            } catch (InvalidMoveException e) {
+                throw new RuntimeException(e);
+            }
+
+            if (isInCheck(currentTurn)) {
+                currentBoard = saveBoard;
+            } else {
+                validMoveList.add(move);
+            }
+        }
+
+        return validMoveList;
     }
 
     /**
@@ -60,7 +81,8 @@ public class ChessGame {
      * @throws InvalidMoveException if move is invalid
      */
     public void makeMove(ChessMove move) throws InvalidMoveException {
-        this.getBoard();
+         currentBoard.addPiece(move.getEndPosition(), currentBoard.getPiece(move.getStartPosition()));
+         currentBoard.addPiece(move.getStartPosition(), null);
     }
 
     /**
@@ -100,7 +122,7 @@ public class ChessGame {
      * @param board the new board to use
      */
     public void setBoard(ChessBoard board) {
-        currentBoard.resetBoard();
+        currentBoard = board;
     }
 
     /**

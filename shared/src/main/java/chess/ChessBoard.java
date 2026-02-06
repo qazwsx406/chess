@@ -72,6 +72,25 @@ public class ChessBoard {
     }
 
     @Override
+    public String toString() {
+        StringBuilder sb = new StringBuilder();
+
+        for (int i = squares.length - 1; i >= 0; i--) {
+            sb.append("[");
+            for (int j = squares[i].length - 1; j >= 0; j--) {
+                sb.append(squares[i][j]);
+
+                if (j > 0) {
+                    sb.append(", ");
+                }
+            }
+            sb.append("]\n");
+        }
+
+        return sb.toString();
+    }
+
+    @Override
     public boolean equals(Object obj) {
         if (this == obj) return true;
         if (obj == null || getClass() != obj.getClass()) return false;

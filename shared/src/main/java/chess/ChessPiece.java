@@ -210,6 +210,11 @@ public class ChessPiece {
     }
 
     @Override
+    public String toString() {
+        return String.format("{%s %s}", pieceColor, type);
+    }
+
+    @Override
     public boolean equals(Object obj) {
         if (this == obj) return true;
         if (obj == null || getClass() != obj.getClass()) return false;
