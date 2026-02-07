@@ -15,7 +15,6 @@ public class ChessPiece {
 
     private final ChessGame.TeamColor pieceColor;
     private final PieceType type;
-    Collection<ChessPosition> canCaptureKing = new ArrayList<>();
 
     public ChessPiece(ChessGame.TeamColor pieceColor, ChessPiece.PieceType type) {
         this.pieceColor = pieceColor;
@@ -220,11 +219,11 @@ public class ChessPiece {
         if (obj == null || getClass() != obj.getClass()) return false;
         ChessPiece that = (ChessPiece) obj;
 
-        return Objects.equals(pieceColor, that.pieceColor) && Objects.equals(type, that.type) && Objects.equals(canCaptureKing, that.canCaptureKing);
+        return Objects.equals(pieceColor, that.pieceColor) && Objects.equals(type, that.type);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(pieceColor, type, canCaptureKing);
+        return Objects.hash(pieceColor, type);
     }
 }
