@@ -77,12 +77,10 @@ public class ChessGame {
     public void makeMove(ChessMove move) throws InvalidMoveException {
         Collection<ChessMove> validMoves = validMoves(move.getStartPosition());
 
-        if (validMoves == null || validMoves.isEmpty()) throw new InvalidMoveException();
+        if (validMoves == null || validMoves.isEmpty() || !validMoves.contains(move)) throw new InvalidMoveException();
 
-        if (validMoves.contains(move)) {
-            currentBoard.addPiece(move.getEndPosition(), currentBoard.getPiece(move.getStartPosition()));
-            currentBoard.addPiece(move.getStartPosition(), null);
-        }
+        currentBoard.addPiece(move.getEndPosition(), currentBoard.getPiece(move.getStartPosition()));
+        currentBoard.addPiece(move.getStartPosition(), null);
 
         if (currentTurn == TeamColor.WHITE) {
             currentTurn = TeamColor.BLACK;
