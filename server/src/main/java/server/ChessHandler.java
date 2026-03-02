@@ -56,6 +56,19 @@ public class ChessHandler {
         }
     }
 
+    public void logout(Context ctx) {
+        try {
+            String authToken = ctx.header("authorization");
+            userService.logout(authToken);
+            ctx.status(200);
+            ctx.result("{}");
+        } catch (UnauthorizedException e) {
+            handleException(ctx, e, 401);
+        } catch (Exception e) {
+            handleException(ctx, e);
+        }
+    }
+
     private void handleException(Context ctx, Exception e, int status) {
         ctx.status(status);
         ctx.result(gson.toJson(Map.of("message", e.getMessage())));
