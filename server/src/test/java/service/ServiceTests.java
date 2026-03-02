@@ -11,6 +11,7 @@ public class ServiceTests {
     private GameDAO gameDAO;
     private ClearService clearService;
     private UserService userService;
+    private GameService gameService;
 
     @BeforeEach
     public void setup() {
@@ -19,6 +20,7 @@ public class ServiceTests {
         gameDAO = new MemoryGameDAO();
         clearService = new ClearService(userDAO, authDAO, gameDAO);
         userService = new UserService(userDAO, authDAO);
+        gameService = new GameService(gameDAO, authDAO);
     }
 
     @Test
@@ -88,5 +90,21 @@ public class ServiceTests {
     @DisplayName("Logout Invalid Token")
     public void logoutInvalidToken() {
         Assertions.assertThrows(UnauthorizedException.class, () -> userService.logout("invalid"));
+    }
+
+    @Test
+    @DisplayName("Create Game Success")
+    public void createGameSuccess() throws Exception {
+        RegisterResult res = userService.register(new RegisterRequest("user", "pass", "email"));
+        
+        CreateGameResult gameRes = gameService.createGame(res.authToken(), new CreateGameRequest("game"));
+        Assertions.assertTrue(gameRes.gameID() > 0);
+    }
+
+    @Test
+    @DisplayName("Create Game Unauthorized")
+    public void createGameUnauthorized() {
+        Assertions.assertThrows(UnauthorizedException.class, () -> 
+            gameService.createGame("invalid", new CreateGameRequest("game")));
     }
 }
