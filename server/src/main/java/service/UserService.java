@@ -26,4 +26,17 @@ public class UserService {
         authDAO.createAuth(new AuthData(authToken, req.username()));
         return new RegisterResult(req.username(), authToken);
     }
+
+    public LoginResult login(LoginRequest req) throws BadRequestException, UnauthorizedException, DataAccessException {
+        if (req.username() == null || req.password() == null) {
+            throw new BadRequestException("Error: bad request");
+        }
+        UserData user = userDAO.getUser(req.username());
+        if (user == null || !user.password().equals(req.password())) {
+            throw new UnauthorizedException("Error: unauthorized");
+        }
+        String authToken = UUID.randomUUID().toString();
+        authDAO.createAuth(new AuthData(authToken, req.username()));
+        return new LoginResult(req.username(), authToken);
+    }
 }
