@@ -107,4 +107,21 @@ public class ServiceTests {
         Assertions.assertThrows(UnauthorizedException.class, () -> 
             gameService.createGame("invalid", new CreateGameRequest("game")));
     }
+
+    @Test
+    @DisplayName("List Games Success")
+    public void listGamesSuccess() throws Exception {
+        RegisterResult res = userService.register(new RegisterRequest("user", "pass", "email"));
+        gameService.createGame(res.authToken(), new CreateGameRequest("g1"));
+        gameService.createGame(res.authToken(), new CreateGameRequest("g2"));
+        
+        ListGamesResult listRes = gameService.listGames(res.authToken());
+        Assertions.assertEquals(2, listRes.games().size());
+    }
+
+    @Test
+    @DisplayName("List Games Unauthorized")
+    public void listGamesUnauthorized() {
+        Assertions.assertThrows(UnauthorizedException.class, () -> gameService.listGames("invalid"));
+    }
 }
