@@ -74,4 +74,19 @@ public class ServiceTests {
         LoginRequest req = new LoginRequest("user", "wrong");
         Assertions.assertThrows(UnauthorizedException.class, () -> userService.login(req));
     }
+
+    @Test
+    @DisplayName("Logout Success")
+    public void logoutSuccess() throws Exception {
+        RegisterResult res = userService.register(new RegisterRequest("user", "pass", "email"));
+        
+        userService.logout(res.authToken());
+        Assertions.assertNull(authDAO.getAuth(res.authToken()));
+    }
+
+    @Test
+    @DisplayName("Logout Invalid Token")
+    public void logoutInvalidToken() {
+        Assertions.assertThrows(UnauthorizedException.class, () -> userService.logout("invalid"));
+    }
 }
