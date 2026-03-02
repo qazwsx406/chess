@@ -21,4 +21,15 @@ public class GameService {
         Collection<GameData> games = gameDAO.listGames();
         return new ListGamesResult(games);
     }
+
+    public CreateGameResult createGame(String authToken, CreateGameRequest req) throws UnauthorizedException, BadRequestException, DataAccessException {
+        if (authDAO.getAuth(authToken) == null) {
+            throw new UnauthorizedException("Error: unauthorized");
+        }
+        if (req.gameName() == null) {
+            throw new BadRequestException("Error: bad request");
+        }
+        int id = gameDAO.createGame(req.gameName());
+        return new CreateGameResult(id);
+    }
 }

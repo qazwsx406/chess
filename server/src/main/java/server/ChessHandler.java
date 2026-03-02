@@ -84,6 +84,22 @@ public class ChessHandler {
         }
     }
 
+    public void createGame(Context ctx) {
+        try {
+            String authToken = ctx.header("authorization");
+            CreateGameRequest req = gson.fromJson(ctx.body(), CreateGameRequest.class);
+            CreateGameResult res = gameService.createGame(authToken, req);
+            ctx.status(200);
+            ctx.result(gson.toJson(res));
+        } catch (BadRequestException e) {
+            handleException(ctx, e, 400);
+        } catch (UnauthorizedException e) {
+            handleException(ctx, e, 401);
+        } catch (Exception e) {
+            handleException(ctx, e);
+        }
+    }
+
     private void handleException(Context ctx, Exception e, int status) {
         ctx.status(status);
         ctx.result(gson.toJson(Map.of("message", e.getMessage())));
