@@ -32,4 +32,33 @@ public class GameService {
         int id = gameDAO.createGame(req.gameName());
         return new CreateGameResult(id);
     }
+
+    public void joinGame(String authToken, JoinGameRequest req) throws UnauthorizedException, BadRequestException, AlreadyTakenException, DataAccessException {
+        AuthData auth = authDAO.getAuth(authToken);
+        if (auth == null) {
+            throw new UnauthorizedException("Error: unauthorized");
+        }
+        GameData game = gameDAO.getGame(req.gameID());
+        if (game == null) {
+            throw new BadRequestException("Error: bad request");
+        }
+        if (req.playerColor() == null) {
+            throw new BadRequestException("Error: bad request");
+        }
+
+        String color = req.playerColor().toUpperCase();
+        if (color.equals("WHITE")) {
+            if (game.whiteUsername() != null) {
+                throw new AlreadyTakenException("Error: already taken");
+            }
+            gameDAO.updateGame(new GameData(game.gameID(), auth.username(), game.blackUsername(), game.gameName(), game.game()));
+        } else if (color.equals("BLACK")) {
+            if (game.blackUsername() != null) {
+                throw new AlreadyTakenException("Error: already taken");
+            }
+            gameDAO.updateGame(new GameData(game.gameID(), game.whiteUsername(), auth.username(), game.gameName(), game.game()));
+        } else {
+            throw new BadRequestException("Error: bad request");
+        }
+    }
 }

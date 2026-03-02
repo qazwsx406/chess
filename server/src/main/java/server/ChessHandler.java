@@ -100,6 +100,24 @@ public class ChessHandler {
         }
     }
 
+    public void joinGame(Context ctx) {
+        try {
+            String authToken = ctx.header("authorization");
+            JoinGameRequest req = gson.fromJson(ctx.body(), JoinGameRequest.class);
+            gameService.joinGame(authToken, req);
+            ctx.status(200);
+            ctx.result("{}");
+        } catch (BadRequestException e) {
+            handleException(ctx, e, 400);
+        } catch (UnauthorizedException e) {
+            handleException(ctx, e, 401);
+        } catch (AlreadyTakenException e) {
+            handleException(ctx, e, 403);
+        } catch (Exception e) {
+            handleException(ctx, e);
+        }
+    }
+
     private void handleException(Context ctx, Exception e, int status) {
         ctx.status(status);
         ctx.result(gson.toJson(Map.of("message", e.getMessage())));
