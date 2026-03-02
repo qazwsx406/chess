@@ -12,7 +12,7 @@ public class Server {
     private final ChessHandler handler = new ChessHandler(userDAO, authDAO, gameDAO);
 
     public Server() {
-        javalin = Javalin.create(config -> config.staticFiles.add("src/main/resources/web", Location.EXTERNAL));
+        javalin = Javalin.create(config -> config.staticFiles.add("/web", Location.CLASSPATH));
 
         javalin.delete("/db", handler::clear);
         javalin.post("/user", handler::register);
