@@ -9,11 +9,13 @@ import java.util.Map;
 public class ChessHandler {
     private final ClearService clearService;
     private final UserService userService;
+    private final GameService gameService;
     private final Gson gson = new Gson();
 
     public ChessHandler(UserDAO userDAO, AuthDAO authDAO, GameDAO gameDAO) {
         this.clearService = new ClearService(userDAO, authDAO, gameDAO);
         this.userService = new UserService(userDAO, authDAO);
+        this.gameService = new GameService(gameDAO, authDAO);
     }
 
     public void clear(Context ctx) {
@@ -62,6 +64,19 @@ public class ChessHandler {
             userService.logout(authToken);
             ctx.status(200);
             ctx.result("{}");
+        } catch (UnauthorizedException e) {
+            handleException(ctx, e, 401);
+        } catch (Exception e) {
+            handleException(ctx, e);
+        }
+    }
+
+    public void listGames(Context ctx) {
+        try {
+            String authToken = ctx.header("authorization");
+            ListGamesResult res = gameService.listGames(authToken);
+            ctx.status(200);
+            ctx.result(gson.toJson(res));
         } catch (UnauthorizedException e) {
             handleException(ctx, e, 401);
         } catch (Exception e) {

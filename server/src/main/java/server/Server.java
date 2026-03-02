@@ -18,6 +18,7 @@ public class Server {
         javalin.post("/user", handler::register);
         javalin.post("/session", handler::login);
         javalin.delete("/session", handler::logout);
+        javalin.get("/game", handler::listGames);
     }
 
     public int run(int desiredPort) {
