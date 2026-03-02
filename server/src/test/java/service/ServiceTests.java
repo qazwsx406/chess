@@ -1,8 +1,7 @@
 package service;
 
 import dataaccess.*;
-import model.AuthData;
-import model.UserData;
+import model.*;
 import org.junit.jupiter.api.*;
 
 public class ServiceTests {
@@ -123,5 +122,30 @@ public class ServiceTests {
     @DisplayName("List Games Unauthorized")
     public void listGamesUnauthorized() {
         Assertions.assertThrows(UnauthorizedException.class, () -> gameService.listGames("invalid"));
+    }
+
+    @Test
+    @DisplayName("Join Game Success")
+    public void joinGameSuccess() throws Exception {
+        RegisterResult res = userService.register(new RegisterRequest("user", "pass", "email"));
+        CreateGameResult gameRes = gameService.createGame(res.authToken(), new CreateGameRequest("game"));
+        
+        gameService.joinGame(res.authToken(), new JoinGameRequest("WHITE", gameRes.gameID()));
+        
+        GameData game = gameDAO.getGame(gameRes.gameID());
+        Assertions.assertEquals("user", game.whiteUsername());
+    }
+
+    @Test
+    @DisplayName("Join Game Taken")
+    public void joinGameTaken() throws Exception {
+        RegisterResult res1 = userService.register(new RegisterRequest("u1", "p", "e"));
+        RegisterResult res2 = userService.register(new RegisterRequest("u2", "p", "e"));
+        CreateGameResult gameRes = gameService.createGame(res1.authToken(), new CreateGameRequest("game"));
+        
+        gameService.joinGame(res1.authToken(), new JoinGameRequest("WHITE", gameRes.gameID()));
+        
+        Assertions.assertThrows(AlreadyTakenException.class, () -> 
+            gameService.joinGame(res2.authToken(), new JoinGameRequest("WHITE", gameRes.gameID())));
     }
 }
