@@ -15,6 +15,7 @@ public class Server {
         javalin = Javalin.create(config -> config.staticFiles.add("src/main/resources/web", Location.EXTERNAL));
 
         javalin.delete("/db", handler::clear);
+        javalin.post("/user", handler::register);
     }
 
     public int run(int desiredPort) {
