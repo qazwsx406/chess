@@ -12,6 +12,12 @@ public class Server {
     private final ChessHandler handler = new ChessHandler(userDAO, authDAO, gameDAO);
 
     public Server() {
+        try {
+            DatabaseManager.createDatabase();
+        } catch (DataAccessException e) {
+            throw new RuntimeException("Failed to initialize database: " + e.getMessage());
+        }
+
         javalin = Javalin.create(config -> config.staticFiles.add("/web", Location.CLASSPATH));
 
         javalin.delete("/db", handler::clear);
