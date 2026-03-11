@@ -13,7 +13,7 @@ public class Server {
 
     public Server() {
         try {
-            DatabaseManager.createDatabase();
+            DatabaseManager.configureDatabase();
         } catch (DataAccessException e) {
             throw new RuntimeException("Failed to initialize database: " + e.getMessage());
         }
