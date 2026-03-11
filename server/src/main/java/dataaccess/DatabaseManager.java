@@ -16,6 +16,44 @@ public class DatabaseManager {
         loadPropertiesFromResources();
     }
 
+    public static void configureDatabase() throws DataAccessException {
+        createDatabase();
+        try (var conn = getConnection()) {
+            for (var statement : createTableStatements) {
+                try (var preparedStatement = conn.prepareStatement(statement)) {
+                    preparedStatement.executeUpdate();
+                }
+            }
+        } catch (SQLException ex) {
+            throw new DataAccessException("failed to configure database", ex);
+        }
+    }
+
+    private static final String[] createTableStatements = {
+            """
+            CREATE TABLE IF NOT EXISTS user (
+                username VARCHAR(255) NOT NULL PRIMARY KEY,
+                password VARCHAR(255) NOT NULL,
+                email VARCHAR(255) NOT NULL
+            )
+            """,
+            """
+            CREATE TABLE IF NOT EXISTS auth (
+                authToken VARCHAR(255) NOT NULL PRIMARY KEY,
+                username VARCHAR(255) NOT NULL
+            )
+            """,
+            """
+            CREATE TABLE IF NOT EXISTS game (
+                gameID INT NOT NULL AUTO_INCREMENT PRIMARY KEY,
+                whiteUsername VARCHAR(255),
+                blackUsername VARCHAR(255),
+                gameName VARCHAR(255) NOT NULL,
+                json TEXT NOT NULL
+            )
+            """
+    };
+
     /**
      * Creates the database if it does not already exist.
      */
