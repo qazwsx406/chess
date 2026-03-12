@@ -1,7 +1,6 @@
 package chess;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collection;
 import java.util.Objects;
 
@@ -54,7 +53,9 @@ public class ChessGame {
      * startPosition
      */
     public Collection<ChessMove> validMoves(ChessPosition startPosition) {
-        if (currentBoard.getPiece(startPosition) == null) return null;
+        if (currentBoard.getPiece(startPosition) == null) {
+            return null;
+        }
         Collection<ChessMove> availableMoveList = currentBoard.getPiece(startPosition).pieceMoves(currentBoard, startPosition);
         Collection<ChessMove> validMoveList = new ArrayList<>();
 
@@ -64,7 +65,9 @@ public class ChessGame {
             currentBoard.addPiece(move.getEndPosition(), currentBoard.getPiece(move.getStartPosition()));
             currentBoard.addPiece(move.getStartPosition(), null);
 
-            if (!isInCheck(currentBoard.getPiece(move.getEndPosition()).getTeamColor())) validMoveList.add(move);
+            if (!isInCheck(currentBoard.getPiece(move.getEndPosition()).getTeamColor())) {
+                validMoveList.add(move);
+            }
 
             currentBoard.addPiece(move.getStartPosition(), currentBoard.getPiece(move.getEndPosition()));
             currentBoard.addPiece(move.getEndPosition(), endPositionPieceSave);
@@ -83,9 +86,13 @@ public class ChessGame {
         Collection<ChessMove> validMoves = validMoves(move.getStartPosition());
         ChessPiece pieceAtPosition = currentBoard.getPiece(move.getStartPosition());
 
-        if (validMoves == null || validMoves.isEmpty() || !validMoves.contains(move) || pieceAtPosition.getTeamColor() != currentTurn) throw new InvalidMoveException();
+        if (validMoves == null || validMoves.isEmpty() || !validMoves.contains(move)
+                || pieceAtPosition.getTeamColor() != currentTurn) {
+            throw new InvalidMoveException();
+        }
 
-        ChessPiece setPiece = move.getPromotionPiece() == null ? pieceAtPosition : new ChessPiece(pieceAtPosition.getTeamColor(), move.getPromotionPiece());
+        ChessPiece setPiece = move.getPromotionPiece() == null ? pieceAtPosition :
+                new ChessPiece(pieceAtPosition.getTeamColor(), move.getPromotionPiece());
         currentBoard.addPiece(move.getEndPosition(), setPiece);
         currentBoard.addPiece(move.getStartPosition(), null);
 
@@ -105,57 +112,59 @@ public class ChessGame {
     public boolean isInCheck(TeamColor teamColor) {
         ChessPosition kingPosition = getKingPosition(teamColor);
 
-        if (kingPosition.getRow() == 0 && kingPosition.getColumn() == 0) return false;
+        if (kingPosition.getRow() == 0 && kingPosition.getColumn() == 0) {
+            return false;
+        }
 
-        if (
-                checkInDirection(kingPosition, ChessPiece.PieceType.BISHOP, 1, 1)
+        if (checkInDirection(kingPosition, ChessPiece.PieceType.BISHOP, 1, 1)
                 || checkInDirection(kingPosition, ChessPiece.PieceType.BISHOP, 1, -1)
                 || checkInDirection(kingPosition, ChessPiece.PieceType.BISHOP, -1, 1)
-                || checkInDirection(kingPosition, ChessPiece.PieceType.BISHOP, -1, -1)
-        ) return true;
-        if (
-                checkInDirection(kingPosition, ChessPiece.PieceType.ROOK, 0, 1)
+                || checkInDirection(kingPosition, ChessPiece.PieceType.BISHOP, -1, -1)) {
+            return true;
+        }
+        if (checkInDirection(kingPosition, ChessPiece.PieceType.ROOK, 0, 1)
                 || checkInDirection(kingPosition, ChessPiece.PieceType.ROOK, 0, -1)
                 || checkInDirection(kingPosition, ChessPiece.PieceType.ROOK, 1, 0)
-                || checkInDirection(kingPosition, ChessPiece.PieceType.ROOK, -1, 0)
-        ) return true;
-        if (
-                checkInDirection(kingPosition, ChessPiece.PieceType.QUEEN, 1, 1)
+                || checkInDirection(kingPosition, ChessPiece.PieceType.ROOK, -1, 0)) {
+            return true;
+        }
+        if (checkInDirection(kingPosition, ChessPiece.PieceType.QUEEN, 1, 1)
                 || checkInDirection(kingPosition, ChessPiece.PieceType.QUEEN, 1, -1)
                 || checkInDirection(kingPosition, ChessPiece.PieceType.QUEEN, -1, 1)
                 || checkInDirection(kingPosition, ChessPiece.PieceType.QUEEN, -1, -1)
                 || checkInDirection(kingPosition, ChessPiece.PieceType.QUEEN, 0, 1)
                 || checkInDirection(kingPosition, ChessPiece.PieceType.QUEEN, 0, -1)
                 || checkInDirection(kingPosition, ChessPiece.PieceType.QUEEN, 1, 0)
-                || checkInDirection(kingPosition, ChessPiece.PieceType.QUEEN, -1, 0)
-        ) return true;
-        if (
-                checkSingleDirction(kingPosition, ChessPiece.PieceType.KNIGHT, 2, 1)
+                || checkInDirection(kingPosition, ChessPiece.PieceType.QUEEN, -1, 0)) {
+            return true;
+        }
+        if (checkSingleDirction(kingPosition, ChessPiece.PieceType.KNIGHT, 2, 1)
                 || checkSingleDirction(kingPosition, ChessPiece.PieceType.KNIGHT, 1, 2)
                 || checkSingleDirction(kingPosition, ChessPiece.PieceType.KNIGHT, -2, 1)
                 || checkSingleDirction(kingPosition, ChessPiece.PieceType.KNIGHT, -1, 2)
                 || checkSingleDirction(kingPosition, ChessPiece.PieceType.KNIGHT, 2, -1)
                 || checkSingleDirction(kingPosition, ChessPiece.PieceType.KNIGHT, 1, -2)
                 || checkSingleDirction(kingPosition, ChessPiece.PieceType.KNIGHT, -2, -1)
-                || checkSingleDirction(kingPosition, ChessPiece.PieceType.KNIGHT, -1, -2)
-        ) return true;
-        if (
-                checkSingleDirction(kingPosition, ChessPiece.PieceType.KING, 1, 1)
+                || checkSingleDirction(kingPosition, ChessPiece.PieceType.KNIGHT, -1, -2)) {
+            return true;
+        }
+        if (checkSingleDirction(kingPosition, ChessPiece.PieceType.KING, 1, 1)
                 || checkSingleDirction(kingPosition, ChessPiece.PieceType.KING, 1, -1)
                 || checkSingleDirction(kingPosition, ChessPiece.PieceType.KING, -1, 1)
                 || checkSingleDirction(kingPosition, ChessPiece.PieceType.KING, -1, -1)
                 || checkSingleDirction(kingPosition, ChessPiece.PieceType.KING, 0, 1)
                 || checkSingleDirction(kingPosition, ChessPiece.PieceType.KING, 0, -1)
                 || checkSingleDirction(kingPosition, ChessPiece.PieceType.KING, 1, 0)
-                || checkSingleDirction(kingPosition, ChessPiece.PieceType.KING, -1, 0)
-        ) return true;
+                || checkSingleDirction(kingPosition, ChessPiece.PieceType.KING, -1, 0)) {
+            return true;
+        }
 
         int direction = (teamColor == ChessGame.TeamColor.WHITE) ? 1 : -1;
 
-        if (
-                checkSingleDirction(kingPosition, ChessPiece.PieceType.PAWN, direction, 1)
-                || checkSingleDirction(kingPosition, ChessPiece.PieceType.PAWN, direction, -1)
-        ) return true;
+        if (checkSingleDirction(kingPosition, ChessPiece.PieceType.PAWN, direction, 1)
+                || checkSingleDirction(kingPosition, ChessPiece.PieceType.PAWN, direction, -1)) {
+            return true;
+        }
 
         return false;
     }
@@ -179,7 +188,9 @@ public class ChessGame {
             currentRow += rowShift;
             currentCol += colShift;
 
-            if (currentRow < 1 || currentRow > 8 || currentCol < 1 || currentCol > 8) break;
+            if (currentRow < 1 || currentRow > 8 || currentCol < 1 || currentCol > 8) {
+                break;
+            }
 
             ChessPosition newPosition = new ChessPosition(currentRow, currentCol);
             ChessPiece pieceAtPosition = currentBoard.getPiece(newPosition);
@@ -220,7 +231,8 @@ public class ChessGame {
             for (int col = 1; col <= 8; col++) {
                 ChessPosition currentPosition = new ChessPosition(row, col);
                 ChessPiece pieceAtPosition = currentBoard.getPiece(currentPosition);
-                if (pieceAtPosition != null && pieceAtPosition.getPieceType() == ChessPiece.PieceType.KING && pieceAtPosition.getTeamColor() == teamColor) {
+                if (pieceAtPosition != null && pieceAtPosition.getPieceType() == ChessPiece.PieceType.KING
+                        && pieceAtPosition.getTeamColor() == teamColor) {
                     return currentPosition;
                 }
             }
@@ -277,8 +289,12 @@ public class ChessGame {
 
     @Override
     public boolean equals(Object obj) {
-        if (this == obj) return true;
-        if (obj == null || getClass() != obj.getClass()) return false;
+        if (this == obj) {
+            return true;
+        }
+        if (obj == null || getClass() != obj.getClass()) {
+            return false;
+        }
         ChessGame that = (ChessGame) obj;
 
         return Objects.equals(currentTurn, that.currentTurn) && Objects.equals(currentBoard, that.currentBoard);

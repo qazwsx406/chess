@@ -139,17 +139,19 @@ public class ChessPiece {
 
         int[] captureCols = {currentCol - 1, currentCol + 1};
         for (int captureCol : captureCols) {
-            if (captureCol >= 1 && captureCol <= 8) {
-                ChessPosition capturePos = new ChessPosition(currentRow + direction, captureCol);
-                if (capturePos.getRow() >= 1 && capturePos.getRow() <= 8) {
-                    ChessPiece targetPiece = board.getPiece(capturePos);
-                    if (targetPiece != null && targetPiece.getTeamColor() != pieceColor) {
-                        if (capturePos.getRow() == promotionRow) {
-                            addPromotionMoves(moves, myPosition, capturePos);
-                        } else {
-                            moves.add(new ChessMove(myPosition, capturePos, null));
-                        }
-                    }
+            if (captureCol < 1 || captureCol > 8) {
+                continue;
+            }
+            ChessPosition capturePos = new ChessPosition(currentRow + direction, captureCol);
+            if (capturePos.getRow() < 1 || capturePos.getRow() > 8) {
+                continue;
+            }
+            ChessPiece targetPiece = board.getPiece(capturePos);
+            if (targetPiece != null && targetPiece.getTeamColor() != pieceColor) {
+                if (capturePos.getRow() == promotionRow) {
+                    addPromotionMoves(moves, myPosition, capturePos);
+                } else {
+                    moves.add(new ChessMove(myPosition, capturePos, null));
                 }
             }
         }
@@ -215,8 +217,12 @@ public class ChessPiece {
 
     @Override
     public boolean equals(Object obj) {
-        if (this == obj) return true;
-        if (obj == null || getClass() != obj.getClass()) return false;
+        if (this == obj) {
+            return true;
+        }
+        if (obj == null || getClass() != obj.getClass()) {
+            return false;
+        }
         ChessPiece that = (ChessPiece) obj;
 
         return Objects.equals(pieceColor, that.pieceColor) && Objects.equals(type, that.type);

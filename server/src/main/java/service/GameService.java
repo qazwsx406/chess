@@ -22,7 +22,8 @@ public class GameService {
         return new ListGamesResult(games);
     }
 
-    public CreateGameResult createGame(String authToken, CreateGameRequest req) throws UnauthorizedException, BadRequestException, DataAccessException {
+    public CreateGameResult createGame(String authToken, CreateGameRequest req)
+            throws UnauthorizedException, BadRequestException, DataAccessException {
         if (authDAO.getAuth(authToken) == null) {
             throw new UnauthorizedException("Error: unauthorized");
         }
@@ -33,7 +34,8 @@ public class GameService {
         return new CreateGameResult(id);
     }
 
-    public void joinGame(String authToken, JoinGameRequest req) throws UnauthorizedException, BadRequestException, AlreadyTakenException, DataAccessException {
+    public void joinGame(String authToken, JoinGameRequest req)
+            throws UnauthorizedException, BadRequestException, AlreadyTakenException, DataAccessException {
         AuthData auth = authDAO.getAuth(authToken);
         if (auth == null) {
             throw new UnauthorizedException("Error: unauthorized");
@@ -51,12 +53,14 @@ public class GameService {
             if (game.whiteUsername() != null) {
                 throw new AlreadyTakenException("Error: already taken");
             }
-            gameDAO.updateGame(new GameData(game.gameID(), auth.username(), game.blackUsername(), game.gameName(), game.game()));
+            gameDAO.updateGame(new GameData(game.gameID(), auth.username(),
+                    game.blackUsername(), game.gameName(), game.game()));
         } else if (color.equals("BLACK")) {
             if (game.blackUsername() != null) {
                 throw new AlreadyTakenException("Error: already taken");
             }
-            gameDAO.updateGame(new GameData(game.gameID(), game.whiteUsername(), auth.username(), game.gameName(), game.game()));
+            gameDAO.updateGame(new GameData(game.gameID(), game.whiteUsername(),
+                    auth.username(), game.gameName(), game.game()));
         } else {
             throw new BadRequestException("Error: bad request");
         }
