@@ -6,9 +6,9 @@ import io.javalin.http.staticfiles.Location;
 
 public class Server {
     private final Javalin javalin;
-    private final UserDAO userDAO = new MemoryUserDAO();
-    private final AuthDAO authDAO = new MemoryAuthDAO();
-    private final GameDAO gameDAO = new MemoryGameDAO();
+    private final UserDAO userDAO = new SqlUserDAO();
+    private final AuthDAO authDAO = new SqlAuthDAO();
+    private final GameDAO gameDAO = new SqlGameDAO();
     private final ChessHandler handler = new ChessHandler(userDAO, authDAO, gameDAO);
 
     public Server() {

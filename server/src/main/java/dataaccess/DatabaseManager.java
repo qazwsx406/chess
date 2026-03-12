@@ -1,5 +1,6 @@
 package dataaccess;
 
+import java.io.InputStream;
 import java.sql.*;
 import java.util.Properties;
 
@@ -91,12 +92,16 @@ public class DatabaseManager {
     }
 
     private static void loadPropertiesFromResources() {
-        try (var propStream = Thread.currentThread().getContextClassLoader().getResourceAsStream("db.properties")) {
-            if (propStream == null) {
+        try (var propStream = DatabaseManager.class.getClassLoader().getResourceAsStream("db.properties")) {
+            InputStream stream = propStream;
+            if (stream == null) {
+                stream = Thread.currentThread().getContextClassLoader().getResourceAsStream("db.properties");
+            }
+            if (stream == null) {
                 throw new Exception("Unable to load db.properties");
             }
             Properties props = new Properties();
-            props.load(propStream);
+            props.load(stream);
             loadProperties(props);
         } catch (Exception ex) {
             throw new RuntimeException("unable to process db.properties", ex);
