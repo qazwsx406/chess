@@ -20,7 +20,7 @@ public class DatabaseManager {
     public static void configureDatabase() throws DataAccessException {
         createDatabase();
         try (var conn = getConnection()) {
-            for (var statement : createTableStatements) {
+            for (var statement : CREATE_TABLE_STATEMENTS) {
                 try (var preparedStatement = conn.prepareStatement(statement)) {
                     preparedStatement.executeUpdate();
                 }
@@ -30,7 +30,7 @@ public class DatabaseManager {
         }
     }
 
-    private static final String[] createTableStatements = {
+    private static final String[] CREATE_TABLE_STATEMENTS = {
             """
             CREATE TABLE IF NOT EXISTS user (
                 username VARCHAR(255) NOT NULL PRIMARY KEY,
