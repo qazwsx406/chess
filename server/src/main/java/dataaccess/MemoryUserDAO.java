@@ -8,7 +8,8 @@ public class MemoryUserDAO implements UserDAO {
 
     @Override
     public void createUser(UserData user) {
-        users.put(user.username(), user);
+        String hashedPassword = org.mindrot.jbcrypt.BCrypt.hashpw(user.password(), org.mindrot.jbcrypt.BCrypt.gensalt());
+        users.put(user.username(), new UserData(user.username(), hashedPassword, user.email()));
     }
 
     @Override
