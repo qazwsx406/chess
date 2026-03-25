@@ -16,17 +16,33 @@ public class ChessClient {
 
     public String eval(String input) {
         try {
-            var tokens = input.toLowerCase().split(" ");
-            var cmd = (tokens.length > 0) ? tokens[0] : "help";
+            var tokens = input.split(" ");
+            var cmd = (tokens.length > 0) ? tokens[0].toLowerCase() : "help";
             var params = Arrays.copyOfRange(tokens, 1, tokens.length);
             return switch (cmd) {
                 case "help" -> help();
+                case "register" -> register(params);
+                case "login" -> login(params);
                 case "quit" -> "quit";
                 default -> "Unknown command. Type Help to see available commands.";
             };
         } catch (Exception e) {
             return e.getMessage();
         }
+    }
+
+    private String register(String[] params) throws Exception {
+        if (params.length != 3) {
+            throw new Exception("Expected: register <USERNAME> <PASSWORD> <EMAIL>");
+        }
+        return "Registering... (Not implemented yet)";
+    }
+
+    private String login(String[] params) throws Exception {
+        if (params.length != 2) {
+            throw new Exception("Expected: login <USERNAME> <PASSWORD>");
+        }
+        return "Logging in... (Not implemented yet)";
     }
 
     public String help() {
