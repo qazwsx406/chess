@@ -89,8 +89,8 @@ public class ChessClient {
         if (params.length != 1) {
             throw new Exception("Expected: create <NAME>");
         }
-        var res = facade.createGame(authToken, new service.CreateGameRequest(params[0]));
-        return "Created game " + params[0] + " with ID " + res.gameID() + ".";
+        facade.createGame(authToken, new service.CreateGameRequest(params[0]));
+        return "Created game " + params[0] + ".";
     }
 
     private String listGames() throws Exception {
