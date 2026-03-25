@@ -1,13 +1,17 @@
 package ui;
 
 import client.ServerFacade;
+import model.GameData;
 import java.util.Arrays;
+import java.util.HashMap;
+import java.util.Map;
 
 public class ChessClient {
     private final ServerFacade facade;
     private final String serverUrl;
     private State state = State.LOGGED_OUT;
     private String authToken = null;
+    private Map<Integer, Integer> gameIdMap = new HashMap<>();
 
     public ChessClient(String serverUrl) {
         this.serverUrl = serverUrl;
@@ -79,11 +83,32 @@ public class ChessClient {
     }
 
     private String createGame(String[] params) throws Exception {
-        return "Not implemented";
+        if (state == State.LOGGED_OUT) {
+            throw new Exception("You must be logged in to create a game.");
+        }
+        if (params.length != 1) {
+            throw new Exception("Expected: create <NAME>");
+        }
+        var res = facade.createGame(authToken, new service.CreateGameRequest(params[0]));
+        return "Created game " + params[0] + " with ID " + res.gameID() + ".";
     }
 
     private String listGames() throws Exception {
-        return "Not implemented";
+        if (state == State.LOGGED_OUT) {
+            throw new Exception("You must be logged in to list games.");
+        }
+        var res = facade.listGames(authToken);
+        gameIdMap.clear();
+        var sb = new StringBuilder();
+        int i = 1;
+        for (var game : res.games()) {
+            gameIdMap.put(i, game.gameID());
+            sb.append(i).append(". ").append(game.gameName()).append("\n");
+            sb.append("   White: ").append(game.whiteUsername() != null ? game.whiteUsername() : "Empty").append("\n");
+            sb.append("   Black: ").append(game.blackUsername() != null ? game.blackUsername() : "Empty").append("\n");
+            i++;
+        }
+        return sb.toString();
     }
 
     private String joinGame(String[] params) throws Exception {
