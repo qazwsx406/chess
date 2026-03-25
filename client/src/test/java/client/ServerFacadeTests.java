@@ -66,4 +66,44 @@ public class ServerFacadeTests {
     public void logoutFailure() throws Exception {
         assertThrows(Exception.class, () -> facade.logout("invalid_token"));
     }
+
+    @Test
+    public void createGameSuccess() throws Exception {
+        var res = facade.register(new RegisterRequest("user", "pass", "email"));
+        var gameRes = facade.createGame(res.authToken(), new CreateGameRequest("game1"));
+        assertNotNull(gameRes.gameID());
+    }
+
+    @Test
+    public void createGameFailure() throws Exception {
+        assertThrows(Exception.class, () -> facade.createGame("invalid_token", new CreateGameRequest("game1")));
+    }
+
+    @Test
+    public void listGamesSuccess() throws Exception {
+        var res = facade.register(new RegisterRequest("user", "pass", "email"));
+        facade.createGame(res.authToken(), new CreateGameRequest("game1"));
+        facade.createGame(res.authToken(), new CreateGameRequest("game2"));
+        var listRes = facade.listGames(res.authToken());
+        assertEquals(2, listRes.games().size());
+    }
+
+    @Test
+    public void listGamesFailure() throws Exception {
+        assertThrows(Exception.class, () -> facade.listGames("invalid_token"));
+    }
+
+    @Test
+    public void joinGameSuccess() throws Exception {
+        var res = facade.register(new RegisterRequest("user", "pass", "email"));
+        var gameRes = facade.createGame(res.authToken(), new CreateGameRequest("game1"));
+        assertDoesNotThrow(() -> facade.joinGame(res.authToken(), new JoinGameRequest("WHITE", gameRes.gameID())));
+    }
+
+    @Test
+    public void joinGameFailure() throws Exception {
+        var res = facade.register(new RegisterRequest("user", "pass", "email"));
+        var gameRes = facade.createGame(res.authToken(), new CreateGameRequest("game1"));
+        assertThrows(Exception.class, () -> facade.joinGame("invalid_token", new JoinGameRequest("WHITE", gameRes.gameID())));
+    }
 }
