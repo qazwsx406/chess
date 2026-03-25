@@ -112,11 +112,64 @@ public class ChessClient {
     }
 
     private String joinGame(String[] params) throws Exception {
-        return "Not implemented";
+        if (state == State.LOGGED_OUT) {
+            throw new Exception("You must be logged in to join a game.");
+        }
+        if (params.length != 2) {
+            throw new Exception("Expected: play <ID> [WHITE|BLACK]");
+        }
+        
+        int listId;
+        try {
+            listId = Integer.parseInt(params[0]);
+        } catch (NumberFormatException e) {
+            throw new Exception("ID must be a number from the list command.");
+        }
+        
+        Integer gameId = gameIdMap.get(listId);
+        if (gameId == null) {
+            throw new Exception("Invalid game ID. Use the list command to see available games.");
+        }
+        
+        String playerColor = params[1].toUpperCase();
+        if (!playerColor.equals("WHITE") && !playerColor.equals("BLACK")) {
+            throw new Exception("Player color must be WHITE or BLACK.");
+        }
+        
+        facade.joinGame(authToken, new service.JoinGameRequest(playerColor, gameId));
+        
+        // Draw the board (Perspective: WHITE if color is WHITE, BLACK if color is BLACK)
+        return "Joined game " + listId + " as " + playerColor + ".\n" + drawBoard(playerColor);
     }
 
     private String observeGame(String[] params) throws Exception {
-        return "Not implemented";
+        if (state == State.LOGGED_OUT) {
+            throw new Exception("You must be logged in to observe a game.");
+        }
+        if (params.length != 1) {
+            throw new Exception("Expected: observe <ID>");
+        }
+        
+        int listId;
+        try {
+            listId = Integer.parseInt(params[0]);
+        } catch (NumberFormatException e) {
+            throw new Exception("ID must be a number from the list command.");
+        }
+        
+        Integer gameId = gameIdMap.get(listId);
+        if (gameId == null) {
+            throw new Exception("Invalid game ID. Use the list command to see available games.");
+        }
+        
+        facade.joinGame(authToken, new service.JoinGameRequest(null, gameId));
+        
+        // Draw the board (Perspective: WHITE for observers)
+        return "Observing game " + listId + ".\n" + drawBoard("WHITE");
+    }
+
+    private String drawBoard(String perspective) {
+        return "Chessboard (" + perspective + " perspective) will be drawn here in Milestone 13-15.";
     }
 
     public String help() {
