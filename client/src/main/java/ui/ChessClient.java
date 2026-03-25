@@ -30,6 +30,10 @@ public class ChessClient {
                 case "register" -> register(params);
                 case "login" -> login(params);
                 case "logout" -> logout();
+                case "create" -> createGame(params);
+                case "list" -> listGames();
+                case "play" -> joinGame(params);
+                case "observe" -> observeGame(params);
                 case "quit" -> "quit";
                 default -> "Unknown command. Type Help to see available commands.";
             };
@@ -72,6 +76,22 @@ public class ChessClient {
         state = State.LOGGED_OUT;
         authToken = null;
         return "Logged out.";
+    }
+
+    private String createGame(String[] params) throws Exception {
+        return "Not implemented";
+    }
+
+    private String listGames() throws Exception {
+        return "Not implemented";
+    }
+
+    private String joinGame(String[] params) throws Exception {
+        return "Not implemented";
+    }
+
+    private String observeGame(String[] params) throws Exception {
+        return "Not implemented";
     }
 
     public String help() {
