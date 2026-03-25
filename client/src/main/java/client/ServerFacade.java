@@ -62,9 +62,10 @@ public class ServerFacade {
     }
 
     public ListGamesResult listGames(String authToken) throws Exception {
-        return null;
+        return makeRequest("GET", "/game", authToken, null, ListGamesResult.class);
     }
 
     public void joinGame(String authToken, JoinGameRequest request) throws Exception {
+        makeRequest("PUT", "/game", authToken, request, null);
     }
 }
