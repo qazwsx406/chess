@@ -169,7 +169,7 @@ public class ChessClient {
     }
 
     private String drawBoard(String perspective) {
-        return "Chessboard (" + perspective + " perspective) will be drawn here in Milestone 13-15.";
+        return BoardDrawer.draw(perspective);
     }
 
     public String help() {
