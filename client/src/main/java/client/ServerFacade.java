@@ -54,10 +54,11 @@ public class ServerFacade {
     }
 
     public void logout(String authToken) throws Exception {
+        makeRequest("DELETE", "/session", authToken, null, null);
     }
 
     public CreateGameResult createGame(String authToken, CreateGameRequest request) throws Exception {
-        return null;
+        return makeRequest("POST", "/game", authToken, request, CreateGameResult.class);
     }
 
     public ListGamesResult listGames(String authToken) throws Exception {
