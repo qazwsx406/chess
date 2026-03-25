@@ -7,10 +7,16 @@ public class ChessClient {
     private final ServerFacade facade;
     private final String serverUrl;
     private State state = State.LOGGED_OUT;
+    private String authToken = null;
 
     public ChessClient(String serverUrl) {
         this.serverUrl = serverUrl;
-        int port = Integer.parseInt(serverUrl.split(":")[2]);
+        int port = 8080;
+        try {
+            port = Integer.parseInt(serverUrl.split(":")[2]);
+        } catch (Exception e) {
+            // Default to 8080
+        }
         this.facade = new ServerFacade(port);
     }
 
@@ -23,6 +29,7 @@ public class ChessClient {
                 case "help" -> help();
                 case "register" -> register(params);
                 case "login" -> login(params);
+                case "logout" -> logout();
                 case "quit" -> "quit";
                 default -> "Unknown command. Type Help to see available commands.";
             };
@@ -32,17 +39,39 @@ public class ChessClient {
     }
 
     private String register(String[] params) throws Exception {
+        if (state != State.LOGGED_OUT) {
+            throw new Exception("You are already logged in.");
+        }
         if (params.length != 3) {
             throw new Exception("Expected: register <USERNAME> <PASSWORD> <EMAIL>");
         }
-        return "Registering... (Not implemented yet)";
+        var res = facade.register(new service.RegisterRequest(params[0], params[1], params[2]));
+        state = State.LOGGED_IN;
+        authToken = res.authToken();
+        return "Successfully registered and logged in as " + res.username() + ".";
     }
 
     private String login(String[] params) throws Exception {
+        if (state != State.LOGGED_OUT) {
+            throw new Exception("You are already logged in.");
+        }
         if (params.length != 2) {
             throw new Exception("Expected: login <USERNAME> <PASSWORD>");
         }
-        return "Logging in... (Not implemented yet)";
+        var res = facade.login(new service.LoginRequest(params[0], params[1]));
+        state = State.LOGGED_IN;
+        authToken = res.authToken();
+        return "Logged in as " + res.username() + ".";
+    }
+
+    private String logout() throws Exception {
+        if (state == State.LOGGED_OUT) {
+            throw new Exception("You are not logged in.");
+        }
+        facade.logout(authToken);
+        state = State.LOGGED_OUT;
+        authToken = null;
+        return "Logged out.";
     }
 
     public String help() {
