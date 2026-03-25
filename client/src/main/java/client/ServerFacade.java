@@ -68,4 +68,8 @@ public class ServerFacade {
     public void joinGame(String authToken, JoinGameRequest request) throws Exception {
         makeRequest("PUT", "/game", authToken, request, null);
     }
+
+    public void clear() throws Exception {
+        makeRequest("DELETE", "/db", null, null, null);
+    }
 }
