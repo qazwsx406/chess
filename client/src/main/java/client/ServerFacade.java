@@ -5,6 +5,7 @@ import service.*;
 import com.google.gson.Gson;
 import java.io.*;
 import java.net.*;
+import java.util.Map;
 
 public class ServerFacade {
     private final String serverUrl;
@@ -41,7 +42,27 @@ public class ServerFacade {
         http.connect();
         
         if (http.getResponseCode() >= 400) {
-            throw new Exception("Error: " + http.getResponseCode());
+            try (InputStream errorStream = http.getErrorStream()) {
+                if (errorStream != null) {
+                    InputStreamReader reader = new InputStreamReader(errorStream);
+                    Map<String, String> errorMap = new Gson().fromJson(reader, Map.class);
+                    if (errorMap != null && errorMap.containsKey("message")) {
+                        throw new Exception(errorMap.get("message"));
+                    }
+                }
+            } catch (Exception e) {
+                if (e.getMessage() != null && !e.getMessage().startsWith("Error: ")) {
+                    throw e;
+                }
+            }
+            
+            switch (http.getResponseCode()) {
+                case 400 -> throw new Exception("Error: bad request");
+                case 401 -> throw new Exception("Error: unauthorized");
+                case 403 -> throw new Exception("Error: already taken");
+                case 500 -> throw new Exception("Error: internal server error");
+                default -> throw new Exception("Error: " + http.getResponseMessage().toLowerCase());
+            }
         }
 
         try (InputStream respBody = http.getInputStream()) {

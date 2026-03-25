@@ -67,4 +67,11 @@ public class BoardDrawer {
         sb.append(SET_BG_COLOR_LIGHT_GREY).append(SET_TEXT_COLOR_BLACK).append(" ").append(displayRow).append(" ");
         sb.append(SET_BG_COLOR_DARK_GREY).append("\n");
     }
+
+    public static void main(String[] args) {
+        System.out.println("White Perspective:");
+        System.out.println(draw("WHITE"));
+        System.out.println("\nBlack Perspective:");
+        System.out.println(draw("BLACK"));
+    }
 }

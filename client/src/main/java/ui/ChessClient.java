@@ -162,9 +162,8 @@ public class ChessClient {
             throw new Exception("Invalid game ID. Use the list command to see available games.");
         }
         
-        facade.joinGame(authToken, new service.JoinGameRequest(null, gameId));
-        
-        // Draw the board (Perspective: WHITE for observers)
+        // In Phase 5, observing doesn't require a server call since it doesn't change game state.
+        // We just draw the board from the white perspective.
         return "Observing game " + listId + ".\n" + drawBoard("WHITE");
     }
 
