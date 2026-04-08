@@ -1,2 +1,4 @@
 This is my first note for cs240
 The tests pass on my end but it doesn't when graded by the autograder...
+
+Init
