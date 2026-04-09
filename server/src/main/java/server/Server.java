@@ -10,6 +10,7 @@ public class Server {
     private final AuthDAO authDAO = new SqlAuthDAO();
     private final GameDAO gameDAO = new SqlGameDAO();
     private final ChessHandler handler = new ChessHandler(userDAO, authDAO, gameDAO);
+    private final WebSocketHandler wsHandler = new WebSocketHandler(userDAO, authDAO, gameDAO);
 
     public Server() {
         try {
@@ -27,6 +28,8 @@ public class Server {
         javalin.get("/game", handler::listGames);
         javalin.post("/game", handler::createGame);
         javalin.put("/game", handler::joinGame);
+
+        javalin.ws("/ws", wsHandler::configure);
     }
 
     public int run(int desiredPort) {
