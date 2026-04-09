@@ -3,7 +3,7 @@ package ui;
 import client.ServerFacade;
 import client.websocket.NotificationHandler;
 import client.websocket.WebSocketCommunicator;
-import model.GameData;
+import chess.ChessBoard;
 import websocket.commands.UserGameCommand;
 import websocket.messages.ServerMessage;
 import websocket.messages.LoadGameMessage;
@@ -23,6 +23,7 @@ public class ChessClient implements NotificationHandler {
     private WebSocketCommunicator ws = null;
     private Integer currentGameId = null;
     private String playerColor = null;
+    private ChessBoard currentBoard = null;
 
     public ChessClient(String serverUrl) {
         this.serverUrl = serverUrl;
@@ -64,7 +65,8 @@ public class ChessClient implements NotificationHandler {
         switch (notification.getServerMessageType()) {
             case LOAD_GAME -> {
                 LoadGameMessage loadMessage = (LoadGameMessage) notification;
-                System.out.println("\n" + BoardDrawer.draw(playerColor != null ? playerColor : "WHITE"));
+                this.currentBoard = loadMessage.getGame().getBoard();
+                System.out.println("\n" + BoardDrawer.draw(playerColor != null ? playerColor : "WHITE", currentBoard));
                 System.out.print("[GAMEPLAY] >>> ");
             }
             case NOTIFICATION -> {
@@ -214,7 +216,7 @@ public class ChessClient implements NotificationHandler {
         if (state != State.GAMEPLAY) {
             throw new Exception("You are not in a game.");
         }
-        return BoardDrawer.draw(playerColor != null ? playerColor : "WHITE");
+        return BoardDrawer.draw(playerColor != null ? playerColor : "WHITE", currentBoard);
     }
 
     private String leave() throws Exception {
@@ -225,6 +227,7 @@ public class ChessClient implements NotificationHandler {
         this.state = State.LOGGED_IN;
         this.currentGameId = null;
         this.playerColor = null;
+        this.currentBoard = null;
         this.ws = null;
         return "Left the game.";
     }

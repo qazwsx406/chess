@@ -1,77 +1,90 @@
 package ui;
 
+import chess.ChessBoard;
+import chess.ChessPiece;
+import chess.ChessPosition;
+import chess.ChessGame;
+
 import static ui.EscapeSequences.*;
 
 public class BoardDrawer {
     private static final int BOARD_SIZE = 8;
     private static final String EMPTY = "   ";
-    
-    private static final String[][] INITIAL_BOARD = {
-        {"R", "N", "B", "Q", "K", "B", "N", "R"},
-        {"P", "P", "P", "P", "P", "P", "P", "P"},
-        {" ", " ", " ", " ", " ", " ", " ", " "},
-        {" ", " ", " ", " ", " ", " ", " ", " "},
-        {" ", " ", " ", " ", " ", " ", " ", " "},
-        {" ", " ", " ", " ", " ", " ", " ", " "},
-        {"p", "p", "p", "p", "p", "p", "p", "p"},
-        {"r", "n", "b", "q", "k", "b", "n", "r"}
-    };
 
-    public static String draw(String perspective) {
+    public static String draw(String perspective, ChessBoard board) {
         StringBuilder sb = new StringBuilder();
-        boolean isWhite = "WHITE".equalsIgnoreCase(perspective);
+        boolean isWhite = !"BLACK".equalsIgnoreCase(perspective);
 
         drawHeaders(sb, isWhite);
-        for (int row = 0; row < BOARD_SIZE; row++) {
-            int actualRow = isWhite ? row : (BOARD_SIZE - 1 - row);
-            int displayRow = isWhite ? (BOARD_SIZE - row) : (row + 1);
-            drawRow(sb, actualRow, displayRow, isWhite);
+        if (isWhite) {
+            for (int row = BOARD_SIZE; row >= 1; row--) {
+                drawRow(sb, row, isWhite, board);
+            }
+        } else {
+            for (int row = 1; row <= BOARD_SIZE; row++) {
+                drawRow(sb, row, isWhite, board);
+            }
         }
         drawHeaders(sb, isWhite);
 
         return sb.toString();
     }
 
+    // Overload for when we don't have a board (e.g. initial setup)
+    public static String draw(String perspective) {
+        ChessBoard board = new ChessBoard();
+        board.resetBoard();
+        return draw(perspective, board);
+    }
+
     private static void drawHeaders(StringBuilder sb, boolean isWhite) {
         sb.append(SET_BG_COLOR_LIGHT_GREY).append(SET_TEXT_COLOR_BLACK).append(EMPTY);
-        for (int col = 0; col < BOARD_SIZE; col++) {
-            char displayCol = (char) (isWhite ? ('a' + col) : ('h' - col));
+        for (int col = 1; col <= BOARD_SIZE; col++) {
+            int actualCol = isWhite ? col : (BOARD_SIZE - col + 1);
+            char displayCol = (char) ('a' + actualCol - 1);
             sb.append(" ").append(displayCol).append(" ");
         }
-        sb.append(EMPTY).append(SET_BG_COLOR_DARK_GREY).append("\n");
+        sb.append(EMPTY).append(SET_BG_COLOR_DARK_GREY).append(RESET_ALL).append("\n");
     }
 
-    private static void drawRow(StringBuilder sb, int actualRow, int displayRow, boolean isWhite) {
-        sb.append(SET_BG_COLOR_LIGHT_GREY).append(SET_TEXT_COLOR_BLACK).append(" ").append(displayRow).append(" ");
-        for (int col = 0; col < BOARD_SIZE; col++) {
-            int actualCol = isWhite ? col : (BOARD_SIZE - 1 - col);
-            
-            if ((actualRow + actualCol) % 2 == 0) {
-                sb.append(SET_BG_COLOR_WHITE);
-            } else {
+    private static void drawRow(StringBuilder sb, int row, boolean isWhite, ChessBoard board) {
+        sb.append(SET_BG_COLOR_LIGHT_GREY).append(SET_TEXT_COLOR_BLACK).append(" ").append(row).append(" ");
+        
+        for (int col = 1; col <= BOARD_SIZE; col++) {
+            int actualCol = isWhite ? col : (BOARD_SIZE - col + 1);
+
+            if ((row + actualCol) % 2 == 0) {
                 sb.append(SET_BG_COLOR_BLACK);
+            } else {
+                sb.append(SET_BG_COLOR_WHITE);
             }
-            
-            String piece = INITIAL_BOARD[actualRow][actualCol];
-            if (piece.equals(" ")) {
+
+            ChessPiece piece = board.getPiece(new ChessPosition(row, actualCol));
+            if (piece == null) {
                 sb.append(EMPTY);
             } else {
-                if (Character.isUpperCase(piece.charAt(0))) {
-                    sb.append(SET_TEXT_COLOR_BLUE); // Black pieces (UpperCase in my array)
+                if (piece.getTeamColor() == ChessGame.TeamColor.WHITE) {
+                    sb.append(SET_TEXT_COLOR_RED);
                 } else {
-                    sb.append(SET_TEXT_COLOR_RED); // White pieces (LowerCase in my array)
+                    sb.append(SET_TEXT_COLOR_BLUE);
                 }
-                sb.append(" ").append(piece.toUpperCase()).append(" ");
+                sb.append(getPieceString(piece));
             }
         }
-        sb.append(SET_BG_COLOR_LIGHT_GREY).append(SET_TEXT_COLOR_BLACK).append(" ").append(displayRow).append(" ");
-        sb.append(SET_BG_COLOR_DARK_GREY).append("\n");
+        
+        sb.append(SET_BG_COLOR_LIGHT_GREY).append(SET_TEXT_COLOR_BLACK).append(" ").append(row).append(" ");
+        sb.append(SET_BG_COLOR_DARK_GREY).append(RESET_ALL).append("\n");
     }
 
-    public static void main(String[] args) {
-        System.out.println("White Perspective:");
-        System.out.println(draw("WHITE"));
-        System.out.println("\nBlack Perspective:");
-        System.out.println(draw("BLACK"));
+    private static String getPieceString(ChessPiece piece) {
+        String s = switch (piece.getPieceType()) {
+            case KING -> " K ";
+            case QUEEN -> " Q ";
+            case BISHOP -> " B ";
+            case KNIGHT -> " N ";
+            case ROOK -> " R ";
+            case PAWN -> " P ";
+        };
+        return s;
     }
 }
