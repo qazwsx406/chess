@@ -91,7 +91,38 @@ public class WebSocketHandler {
     }
 
     private void makeMove(io.javalin.websocket.WsMessageContext ctx, UserGameCommand command) throws Exception { }
-    private void leave(io.javalin.websocket.WsMessageContext ctx, UserGameCommand command) throws Exception { }
+    private void leave(io.javalin.websocket.WsMessageContext ctx, UserGameCommand command) throws Exception {
+        String authToken = command.getAuthToken();
+        int gameID = command.getGameID();
+
+        model.AuthData auth = authDAO.getAuth(authToken);
+        if (auth == null) {
+            throw new Exception("Invalid auth token");
+        }
+
+        model.GameData gameData = gameDAO.getGame(gameID);
+        if (gameData == null) {
+            throw new Exception("Invalid game ID");
+        }
+
+        String username = auth.username();
+        boolean isPlayer = false;
+        if (username.equals(gameData.whiteUsername())) {
+            gameData = new model.GameData(gameData.gameID(), null, gameData.blackUsername(), gameData.gameName(), gameData.game());
+            gameDAO.updateGame(gameData);
+            isPlayer = true;
+        } else if (username.equals(gameData.blackUsername())) {
+            gameData = new model.GameData(gameData.gameID(), gameData.whiteUsername(), null, gameData.gameName(), gameData.game());
+            gameDAO.updateGame(gameData);
+            isPlayer = true;
+        }
+
+        sessionManager.removeSession(ctx);
+
+        String message = String.format("%s left the game", username);
+        websocket.messages.NotificationMessage notification = new websocket.messages.NotificationMessage(message);
+        sessionManager.broadcast(gameID, notification, authToken);
+    }
     private void resign(io.javalin.websocket.WsMessageContext ctx, UserGameCommand command) throws Exception { }
 
     private void sendError(io.javalin.websocket.WsMessageContext ctx, String message) {
