@@ -11,6 +11,7 @@ public class WebSocketHandler {
     private final UserDAO userDAO;
     private final AuthDAO authDAO;
     private final GameDAO gameDAO;
+    private final SessionManager sessionManager = new SessionManager();
     private final Gson gson = new Gson();
 
     public WebSocketHandler(UserDAO userDAO, AuthDAO authDAO, GameDAO gameDAO) {
@@ -33,6 +34,7 @@ public class WebSocketHandler {
 
         ws.onClose(ctx -> {
             System.out.println("WebSocket closed: " + ctx.getSessionId());
+            sessionManager.removeSession(ctx);
         });
 
         ws.onError(ctx -> {
@@ -42,7 +44,61 @@ public class WebSocketHandler {
     }
 
     private void handleCommand(io.javalin.websocket.WsMessageContext ctx, UserGameCommand command) {
-        // To be implemented in future milestones
-        System.out.println("Handling command: " + command.getCommandType());
+        try {
+            switch (command.getCommandType()) {
+                case CONNECT -> connect(ctx, command);
+                case MAKE_MOVE -> makeMove(ctx, command);
+                case LEAVE -> leave(ctx, command);
+                case RESIGN -> resign(ctx, command);
+            }
+        } catch (Exception e) {
+            sendError(ctx, e.getMessage());
+        }
+    }
+
+    private void connect(io.javalin.websocket.WsMessageContext ctx, UserGameCommand command) throws Exception {
+        String authToken = command.getAuthToken();
+        int gameID = command.getGameID();
+
+        model.AuthData auth = authDAO.getAuth(authToken);
+        if (auth == null) {
+            throw new Exception("Invalid auth token");
+        }
+
+        model.GameData gameData = gameDAO.getGame(gameID);
+        if (gameData == null) {
+            throw new Exception("Invalid game ID");
+        }
+
+        sessionManager.addSessionToGame(gameID, authToken, ctx);
+
+        websocket.messages.LoadGameMessage loadMessage = new websocket.messages.LoadGameMessage(gameData.game());
+        ctx.send(gson.toJson(loadMessage));
+
+        String username = auth.username();
+        String role = "";
+        if (username.equals(gameData.whiteUsername())) {
+            role = "white player";
+        } else if (username.equals(gameData.blackUsername())) {
+            role = "black player";
+        } else {
+            role = "observer";
+        }
+
+        String message = String.format("%s joined the game as %s", username, role);
+        websocket.messages.NotificationMessage notification = new websocket.messages.NotificationMessage(message);
+        sessionManager.broadcast(gameID, notification, authToken);
+    }
+
+    private void makeMove(io.javalin.websocket.WsMessageContext ctx, UserGameCommand command) throws Exception { }
+    private void leave(io.javalin.websocket.WsMessageContext ctx, UserGameCommand command) throws Exception { }
+    private void resign(io.javalin.websocket.WsMessageContext ctx, UserGameCommand command) throws Exception { }
+
+    private void sendError(io.javalin.websocket.WsMessageContext ctx, String message) {
+        try {
+            ctx.send(gson.toJson(new websocket.messages.ErrorMessage("Error: " + message)));
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
     }
 }
