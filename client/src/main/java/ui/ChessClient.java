@@ -13,6 +13,7 @@ import websocket.messages.ErrorMessage;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Scanner;
 
 public class ChessClient implements NotificationHandler {
     private final ServerFacade facade;
@@ -52,6 +53,7 @@ public class ChessClient implements NotificationHandler {
                 case "observe" -> observeGame(params);
                 case "redraw" -> redrawBoard();
                 case "leave" -> leave();
+                case "resign" -> resign();
                 case "quit" -> "quit";
                 default -> "Unknown command. Type Help to see available commands.";
             };
@@ -230,6 +232,21 @@ public class ChessClient implements NotificationHandler {
         this.currentBoard = null;
         this.ws = null;
         return "Left the game.";
+    }
+
+    private String resign() throws Exception {
+        if (state != State.GAMEPLAY) {
+            throw new Exception("You are not in a game.");
+        }
+        System.out.print("Are you sure you want to resign? (yes/no): ");
+        Scanner scanner = new Scanner(System.in);
+        String choice = scanner.nextLine().trim().toLowerCase();
+        if (choice.equals("yes")) {
+            this.ws.send(new UserGameCommand(UserGameCommand.CommandType.RESIGN, authToken, currentGameId));
+            return "Resigning...";
+        } else {
+            return "Resignation cancelled.";
+        }
     }
 
     public String help() {

@@ -123,7 +123,36 @@ public class WebSocketHandler {
         websocket.messages.NotificationMessage notification = new websocket.messages.NotificationMessage(message);
         sessionManager.broadcast(gameID, notification, authToken);
     }
-    private void resign(io.javalin.websocket.WsMessageContext ctx, UserGameCommand command) throws Exception { }
+    private void resign(io.javalin.websocket.WsMessageContext ctx, UserGameCommand command) throws Exception {
+        String authToken = command.getAuthToken();
+        int gameID = command.getGameID();
+
+        model.AuthData auth = authDAO.getAuth(authToken);
+        if (auth == null) {
+            throw new Exception("Invalid auth token");
+        }
+
+        model.GameData gameData = gameDAO.getGame(gameID);
+        if (gameData == null) {
+            throw new Exception("Invalid game ID");
+        }
+
+        String username = auth.username();
+        if (!username.equals(gameData.whiteUsername()) && !username.equals(gameData.blackUsername())) {
+            throw new Exception("Observers cannot resign");
+        }
+
+        if (gameData.game().isFinished()) {
+            throw new Exception("Game is already over");
+        }
+
+        gameData.game().setFinished(true);
+        gameDAO.updateGame(gameData);
+
+        String message = String.format("%s resigned. The game is over.", username);
+        websocket.messages.NotificationMessage notification = new websocket.messages.NotificationMessage(message);
+        sessionManager.broadcast(gameID, notification, null);
+    }
 
     private void sendError(io.javalin.websocket.WsMessageContext ctx, String message) {
         try {

@@ -14,11 +14,20 @@ public class ChessGame {
 
     TeamColor currentTurn;
     ChessBoard currentBoard;
+    boolean isFinished = false;
 
     public ChessGame() {
         currentBoard = new ChessBoard();
         currentBoard.resetBoard();
         currentTurn = TeamColor.WHITE;
+    }
+
+    public boolean isFinished() {
+        return isFinished;
+    }
+
+    public void setFinished(boolean finished) {
+        isFinished = finished;
     }
 
     /**
@@ -49,7 +58,7 @@ public class ChessGame {
      * Gets a valid moves for a piece at the given location
      *
      * @param startPosition the piece to get valid moves for
-     * @return Set of valid moves for requested piece, or null if no piece at
+     * @return Set of valid moves for requested piece, or null if no piece at      
      * startPosition
      */
     public Collection<ChessMove> validMoves(ChessPosition startPosition) {
@@ -70,7 +79,7 @@ public class ChessGame {
             }
 
             currentBoard.addPiece(move.getStartPosition(), currentBoard.getPiece(move.getEndPosition()));
-            currentBoard.addPiece(move.getEndPosition(), endPositionPieceSave);
+            currentBoard.addPiece(move.getEndPosition(), endPositionPieceSave);    
         }
 
         return validMoveList;
@@ -83,7 +92,10 @@ public class ChessGame {
      * @throws InvalidMoveException if move is invalid
      */
     public void makeMove(ChessMove move) throws InvalidMoveException {
-        Collection<ChessMove> validMoves = validMoves(move.getStartPosition());
+        if (isFinished) {
+            throw new InvalidMoveException("Game is over");
+        }
+        Collection<ChessMove> validMoves = validMoves(move.getStartPosition());    
         ChessPiece pieceAtPosition = currentBoard.getPiece(move.getStartPosition());
 
         if (validMoves == null || validMoves.isEmpty() || !validMoves.contains(move)
@@ -91,7 +103,7 @@ public class ChessGame {
             throw new InvalidMoveException();
         }
 
-        ChessPiece setPiece = move.getPromotionPiece() == null ? pieceAtPosition :
+        ChessPiece setPiece = move.getPromotionPiece() == null ? pieceAtPosition : 
                 new ChessPiece(pieceAtPosition.getTeamColor(), move.getPromotionPiece());
         currentBoard.addPiece(move.getEndPosition(), setPiece);
         currentBoard.addPiece(move.getStartPosition(), null);
@@ -116,19 +128,19 @@ public class ChessGame {
             return false;
         }
 
-        if (checkInDirection(kingPosition, ChessPiece.PieceType.BISHOP, 1, 1)
+        if (checkInDirection(kingPosition, ChessPiece.PieceType.BISHOP, 1, 1)      
                 || checkInDirection(kingPosition, ChessPiece.PieceType.BISHOP, 1, -1)
                 || checkInDirection(kingPosition, ChessPiece.PieceType.BISHOP, -1, 1)
                 || checkInDirection(kingPosition, ChessPiece.PieceType.BISHOP, -1, -1)) {
             return true;
         }
-        if (checkInDirection(kingPosition, ChessPiece.PieceType.ROOK, 0, 1)
+        if (checkInDirection(kingPosition, ChessPiece.PieceType.ROOK, 0, 1)        
                 || checkInDirection(kingPosition, ChessPiece.PieceType.ROOK, 0, -1)
-                || checkInDirection(kingPosition, ChessPiece.PieceType.ROOK, 1, 0)
+                || checkInDirection(kingPosition, ChessPiece.PieceType.ROOK, 1, 0) 
                 || checkInDirection(kingPosition, ChessPiece.PieceType.ROOK, -1, 0)) {
             return true;
         }
-        if (checkInDirection(kingPosition, ChessPiece.PieceType.QUEEN, 1, 1)
+        if (checkInDirection(kingPosition, ChessPiece.PieceType.QUEEN, 1, 1)       
                 || checkInDirection(kingPosition, ChessPiece.PieceType.QUEEN, 1, -1)
                 || checkInDirection(kingPosition, ChessPiece.PieceType.QUEEN, -1, 1)
                 || checkInDirection(kingPosition, ChessPiece.PieceType.QUEEN, -1, -1)
@@ -138,7 +150,7 @@ public class ChessGame {
                 || checkInDirection(kingPosition, ChessPiece.PieceType.QUEEN, -1, 0)) {
             return true;
         }
-        if (checkSingleDirction(kingPosition, ChessPiece.PieceType.KNIGHT, 2, 1)
+        if (checkSingleDirction(kingPosition, ChessPiece.PieceType.KNIGHT, 2, 1)   
                 || checkSingleDirction(kingPosition, ChessPiece.PieceType.KNIGHT, 1, 2)
                 || checkSingleDirction(kingPosition, ChessPiece.PieceType.KNIGHT, -2, 1)
                 || checkSingleDirction(kingPosition, ChessPiece.PieceType.KNIGHT, -1, 2)
@@ -148,7 +160,7 @@ public class ChessGame {
                 || checkSingleDirction(kingPosition, ChessPiece.PieceType.KNIGHT, -1, -2)) {
             return true;
         }
-        if (checkSingleDirction(kingPosition, ChessPiece.PieceType.KING, 1, 1)
+        if (checkSingleDirction(kingPosition, ChessPiece.PieceType.KING, 1, 1)     
                 || checkSingleDirction(kingPosition, ChessPiece.PieceType.KING, 1, -1)
                 || checkSingleDirction(kingPosition, ChessPiece.PieceType.KING, -1, 1)
                 || checkSingleDirction(kingPosition, ChessPiece.PieceType.KING, -1, -1)
@@ -192,8 +204,8 @@ public class ChessGame {
                 break;
             }
 
-            ChessPosition newPosition = new ChessPosition(currentRow, currentCol);
-            ChessPiece pieceAtPosition = currentBoard.getPiece(newPosition);
+            ChessPosition newPosition = new ChessPosition(currentRow, currentCol); 
+            ChessPiece pieceAtPosition = currentBoard.getPiece(newPosition);       
 
             if (pieceAtPosition != null) {
                 if (pieceAtPosition.getTeamColor() != kingColor && pieceAtPosition.getPieceType() == threatPiece) {
@@ -209,7 +221,7 @@ public class ChessGame {
         int checkRow = kingPosition.getRow() + rowShift;
         int checkCol = kingPosition.getColumn() + colShift;
 
-        if (checkRow < 1 || checkRow > 8 || checkCol < 1 || checkCol > 8) {
+        if (checkRow < 1 || checkRow > 8 || checkCol < 1 || checkCol > 8) {        
             return false;
         }
 
@@ -229,7 +241,7 @@ public class ChessGame {
     private ChessPosition getKingPosition(TeamColor teamColor) {
         for (int row = 1; row <= 8; row++) {
             for (int col = 1; col <= 8; col++) {
-                ChessPosition currentPosition = new ChessPosition(row, col);
+                ChessPosition currentPosition = new ChessPosition(row, col);       
                 ChessPiece pieceAtPosition = currentBoard.getPiece(currentPosition);
                 if (pieceAtPosition != null && pieceAtPosition.getPieceType() == ChessPiece.PieceType.KING
                         && pieceAtPosition.getTeamColor() == teamColor) {
@@ -297,11 +309,11 @@ public class ChessGame {
         }
         ChessGame that = (ChessGame) obj;
 
-        return Objects.equals(currentTurn, that.currentTurn) && Objects.equals(currentBoard, that.currentBoard);
+        return Objects.equals(currentTurn, that.currentTurn) && Objects.equals(currentBoard, that.currentBoard) && isFinished == that.isFinished;
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(currentTurn, currentBoard);
+        return Objects.hash(currentTurn, currentBoard, isFinished);
     }
 }
