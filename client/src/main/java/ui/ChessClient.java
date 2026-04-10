@@ -4,7 +4,11 @@ import client.ServerFacade;
 import client.websocket.NotificationHandler;
 import client.websocket.WebSocketCommunicator;
 import chess.ChessBoard;
+import chess.ChessPosition;
+import chess.ChessMove;
+import chess.ChessPiece;
 import websocket.commands.UserGameCommand;
+import websocket.commands.MakeMoveCommand;
 import websocket.messages.ServerMessage;
 import websocket.messages.LoadGameMessage;
 import websocket.messages.NotificationMessage;
@@ -14,6 +18,7 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Scanner;
+import java.util.Collection;
 
 public class ChessClient implements NotificationHandler {
     private final ServerFacade facade;
@@ -25,6 +30,7 @@ public class ChessClient implements NotificationHandler {
     private Integer currentGameId = null;
     private String playerColor = null;
     private ChessBoard currentBoard = null;
+    private chess.ChessGame currentFullGame = null;
 
     public ChessClient(String serverUrl) {
         this.serverUrl = serverUrl;
@@ -54,6 +60,8 @@ public class ChessClient implements NotificationHandler {
                 case "redraw" -> redrawBoard();
                 case "leave" -> leave();
                 case "resign" -> resign();
+                case "make" -> makeMove(params);
+                case "highlight" -> highlightMoves(params);
                 case "quit" -> "quit";
                 default -> "Unknown command. Type Help to see available commands.";
             };
@@ -67,7 +75,8 @@ public class ChessClient implements NotificationHandler {
         switch (notification.getServerMessageType()) {
             case LOAD_GAME -> {
                 LoadGameMessage loadMessage = (LoadGameMessage) notification;
-                this.currentBoard = loadMessage.getGame().getBoard();
+                this.currentFullGame = loadMessage.getGame();
+                this.currentBoard = this.currentFullGame.getBoard();
                 System.out.println("\n" + BoardDrawer.draw(playerColor != null ? playerColor : "WHITE", currentBoard));
                 System.out.print("[GAMEPLAY] >>> ");
             }
@@ -230,6 +239,7 @@ public class ChessClient implements NotificationHandler {
         this.currentGameId = null;
         this.playerColor = null;
         this.currentBoard = null;
+        this.currentFullGame = null;
         this.ws = null;
         return "Left the game.";
     }
@@ -247,6 +257,58 @@ public class ChessClient implements NotificationHandler {
         } else {
             return "Resignation cancelled.";
         }
+    }
+
+    private String makeMove(String[] params) throws Exception {
+        if (state != State.GAMEPLAY) {
+            throw new Exception("You are not in a game.");
+        }
+        if (params.length < 2) {
+            throw new Exception("Expected: make <START> <END> [PROMOTION_PIECE]");
+        }
+        ChessPosition start = parsePosition(params[0]);
+        ChessPosition end = parsePosition(params[1]);
+        ChessPiece.PieceType promotion = null;
+        if (params.length > 2) {
+            promotion = switch (params[2].toUpperCase()) {
+                case "QUEEN" -> ChessPiece.PieceType.QUEEN;
+                case "ROOK" -> ChessPiece.PieceType.ROOK;
+                case "BISHOP" -> ChessPiece.PieceType.BISHOP;
+                case "KNIGHT" -> ChessPiece.PieceType.KNIGHT;
+                default -> throw new Exception("Invalid promotion piece.");
+            };
+        }
+        
+        ChessMove move = new ChessMove(start, end, promotion);
+        this.ws.send(new MakeMoveCommand(authToken, currentGameId, move));
+        return "Move request sent.";
+    }
+
+    private String highlightMoves(String[] params) throws Exception {
+        if (state != State.GAMEPLAY) {
+            throw new Exception("You are not in a game.");
+        }
+        if (params.length != 1) {
+            throw new Exception("Expected: highlight <POSITION> (e.g. a2)");
+        }
+        ChessPosition pos = parsePosition(params[0]);
+        Collection<ChessMove> moves = currentFullGame.validMoves(pos);
+        if (moves == null) {
+            throw new Exception("No piece at that position.");
+        }
+        return BoardDrawer.draw(playerColor != null ? playerColor : "WHITE", currentBoard, moves);
+    }
+
+    private ChessPosition parsePosition(String posStr) throws Exception {
+        if (posStr.length() != 2) {
+            throw new Exception("Invalid position format. Use e.g. a2");
+        }
+        int col = posStr.charAt(0) - 'a' + 1;
+        int row = posStr.charAt(1) - '1' + 1;
+        if (col < 1 || col > 8 || row < 1 || row > 8) {
+            throw new Exception("Position out of bounds.");
+        }
+        return new ChessPosition(row, col);
     }
 
     public String help() {
@@ -271,9 +333,9 @@ public class ChessClient implements NotificationHandler {
             return """
                     redraw - the board
                     leave - the game
-                    make <MOVE> - a move
+                    make <START> <END> [PROMOTION_PIECE] - a move (e.g. make a2 a4)
                     resign - the match
-                    highlight <PIECE> - legal moves
+                    highlight <POSITION> - legal moves (e.g. highlight a2)
                     help - with possible commands
                     """;
         }
