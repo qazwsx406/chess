@@ -128,113 +128,63 @@ public class ChessGame {
             return false;
         }
 
-        if (checkInDirection(kingPosition, ChessPiece.PieceType.BISHOP, 1, 1)      
-                || checkInDirection(kingPosition, ChessPiece.PieceType.BISHOP, 1, -1)
-                || checkInDirection(kingPosition, ChessPiece.PieceType.BISHOP, -1, 1)
-                || checkInDirection(kingPosition, ChessPiece.PieceType.BISHOP, -1, -1)) {
-            return true;
-        }
-        if (checkInDirection(kingPosition, ChessPiece.PieceType.ROOK, 0, 1)        
-                || checkInDirection(kingPosition, ChessPiece.PieceType.ROOK, 0, -1)
-                || checkInDirection(kingPosition, ChessPiece.PieceType.ROOK, 1, 0) 
-                || checkInDirection(kingPosition, ChessPiece.PieceType.ROOK, -1, 0)) {
-            return true;
-        }
-        if (checkInDirection(kingPosition, ChessPiece.PieceType.QUEEN, 1, 1)       
-                || checkInDirection(kingPosition, ChessPiece.PieceType.QUEEN, 1, -1)
-                || checkInDirection(kingPosition, ChessPiece.PieceType.QUEEN, -1, 1)
-                || checkInDirection(kingPosition, ChessPiece.PieceType.QUEEN, -1, -1)
-                || checkInDirection(kingPosition, ChessPiece.PieceType.QUEEN, 0, 1)
-                || checkInDirection(kingPosition, ChessPiece.PieceType.QUEEN, 0, -1)
-                || checkInDirection(kingPosition, ChessPiece.PieceType.QUEEN, 1, 0)
-                || checkInDirection(kingPosition, ChessPiece.PieceType.QUEEN, -1, 0)) {
-            return true;
-        }
-        if (checkSingleDirction(kingPosition, ChessPiece.PieceType.KNIGHT, 2, 1)   
-                || checkSingleDirction(kingPosition, ChessPiece.PieceType.KNIGHT, 1, 2)
-                || checkSingleDirction(kingPosition, ChessPiece.PieceType.KNIGHT, -2, 1)
-                || checkSingleDirction(kingPosition, ChessPiece.PieceType.KNIGHT, -1, 2)
-                || checkSingleDirction(kingPosition, ChessPiece.PieceType.KNIGHT, 2, -1)
-                || checkSingleDirction(kingPosition, ChessPiece.PieceType.KNIGHT, 1, -2)
-                || checkSingleDirction(kingPosition, ChessPiece.PieceType.KNIGHT, -2, -1)
-                || checkSingleDirction(kingPosition, ChessPiece.PieceType.KNIGHT, -1, -2)) {
-            return true;
-        }
-        if (checkSingleDirction(kingPosition, ChessPiece.PieceType.KING, 1, 1)     
-                || checkSingleDirction(kingPosition, ChessPiece.PieceType.KING, 1, -1)
-                || checkSingleDirction(kingPosition, ChessPiece.PieceType.KING, -1, 1)
-                || checkSingleDirction(kingPosition, ChessPiece.PieceType.KING, -1, -1)
-                || checkSingleDirction(kingPosition, ChessPiece.PieceType.KING, 0, 1)
-                || checkSingleDirction(kingPosition, ChessPiece.PieceType.KING, 0, -1)
-                || checkSingleDirction(kingPosition, ChessPiece.PieceType.KING, 1, 0)
-                || checkSingleDirction(kingPosition, ChessPiece.PieceType.KING, -1, 0)) {
-            return true;
-        }
-
-        int direction = (teamColor == ChessGame.TeamColor.WHITE) ? 1 : -1;
-
-        if (checkSingleDirction(kingPosition, ChessPiece.PieceType.PAWN, direction, 1)
-                || checkSingleDirction(kingPosition, ChessPiece.PieceType.PAWN, direction, -1)) {
-            return true;
-        }
-
-        return false;
-    }
-
-    /**
-     * Determines if the given team is in checkmate
-     *
-     * @param teamColor which team to check for checkmate
-     * @return True if the specified team is in checkmate
-     */
-    public boolean isInCheckmate(TeamColor teamColor) {
-        return isInCheck(teamColor) && !hasValidMoves(teamColor);
-    }
-
-    private boolean checkInDirection(ChessPosition kingPosition, ChessPiece.PieceType threatPiece, int rowShift, int colShift) {
-        int currentRow = kingPosition.getRow();
-        int currentCol = kingPosition.getColumn();
-        ChessGame.TeamColor kingColor = currentBoard.getPiece(kingPosition).getTeamColor();
-
-        while (true) {
-            currentRow += rowShift;
-            currentCol += colShift;
-
-            if (currentRow < 1 || currentRow > 8 || currentCol < 1 || currentCol > 8) {
-                break;
-            }
-
-            ChessPosition newPosition = new ChessPosition(currentRow, currentCol); 
-            ChessPiece pieceAtPosition = currentBoard.getPiece(newPosition);       
-
-            if (pieceAtPosition != null) {
-                if (pieceAtPosition.getTeamColor() != kingColor && pieceAtPosition.getPieceType() == threatPiece) {
-                    return true;
-                }
-                break;
-            }
-        }
-        return false;
-    }
-
-    private boolean checkSingleDirction(ChessPosition kingPosition, ChessPiece.PieceType threatPiece, int rowShift, int colShift) {
-        int checkRow = kingPosition.getRow() + rowShift;
-        int checkCol = kingPosition.getColumn() + colShift;
-
-        if (checkRow < 1 || checkRow > 8 || checkCol < 1 || checkCol > 8) {        
-            return false;
-        }
-
-        ChessPosition newPosition = new ChessPosition(checkRow, checkCol);
-        ChessPiece pieceAtPosition = currentBoard.getPiece(newPosition);
-        ChessGame.TeamColor kingColor = currentBoard.getPiece(kingPosition).getTeamColor();
-
-        if (pieceAtPosition != null) {
-            if (pieceAtPosition.getTeamColor() != kingColor && pieceAtPosition.getPieceType() == threatPiece) {
+        int[][] slidingDirections = {{1, 1}, {1, -1}, {-1, 1}, {-1, -1}, {0, 1}, {0, -1}, {1, 0}, {-1, 0}};
+        for (int[] dir : slidingDirections) {
+            if (checkInDirection(kingPosition, dir[0], dir[1])) {
                 return true;
             }
         }
 
+        int[][] knightMoves = {{2, 1}, {1, 2}, {-2, 1}, {-1, 2}, {2, -1}, {1, -2}, {-2, -1}, {-1, -2}};
+        for (int[] move : knightMoves) {
+            if (checkAtPosition(kingPosition, ChessPiece.PieceType.KNIGHT, move[0], move[1])) {
+                return true;
+            }
+        }
+
+        int[][] kingMoves = {{1, 1}, {1, -1}, {-1, 1}, {-1, -1}, {0, 1}, {0, -1}, {1, 0}, {-1, 0}};
+        for (int[] move : kingMoves) {
+            if (checkAtPosition(kingPosition, ChessPiece.PieceType.KING, move[0], move[1])) {
+                return true;
+            }
+        }
+
+        int pawnDir = (teamColor == TeamColor.WHITE) ? 1 : -1;
+        return checkAtPosition(kingPosition, ChessPiece.PieceType.PAWN, pawnDir, 1)
+                || checkAtPosition(kingPosition, ChessPiece.PieceType.PAWN, pawnDir, -1);
+    }
+
+    private boolean checkInDirection(ChessPosition kingPos, int rowShift, int colShift) {
+        int r = kingPos.getRow() + rowShift;
+        int c = kingPos.getColumn() + colShift;
+        TeamColor color = currentBoard.getPiece(kingPos).getTeamColor();
+
+        while (r >= 1 && r <= 8 && c >= 1 && c <= 8) {
+            ChessPiece piece = currentBoard.getPiece(new ChessPosition(r, c));
+            if (piece != null) {
+                if (piece.getTeamColor() != color) {
+                    ChessPiece.PieceType type = piece.getPieceType();
+                    if (type == ChessPiece.PieceType.QUEEN) return true;
+                    if ((rowShift != 0 && colShift != 0) && type == ChessPiece.PieceType.BISHOP) return true;
+                    if ((rowShift == 0 || colShift == 0) && type == ChessPiece.PieceType.ROOK) return true;
+                }
+                break;
+            }
+            r += rowShift;
+            c += colShift;
+        }
+        return false;
+    }
+
+    private boolean checkAtPosition(ChessPosition kingPos, ChessPiece.PieceType type, int rowShift, int colShift) {
+        int r = kingPos.getRow() + rowShift;
+        int c = kingPos.getColumn() + colShift;
+
+        if (r >= 1 && r <= 8 && c >= 1 && c <= 8) {
+            ChessPiece piece = currentBoard.getPiece(new ChessPosition(r, c));
+            return piece != null && piece.getTeamColor() != currentBoard.getPiece(kingPos).getTeamColor() 
+                   && piece.getPieceType() == type;
+        }
         return false;
     }
 
@@ -261,6 +211,10 @@ public class ChessGame {
      * @param teamColor which team to check for stalemate
      * @return True if the specified team is in stalemate, otherwise false
      */
+    public boolean isInCheckmate(TeamColor teamColor) {
+        return isInCheck(teamColor) && !hasValidMoves(teamColor);
+    }
+
     public boolean isInStalemate(TeamColor teamColor) {
         return !isInCheck(teamColor) && !hasValidMoves(teamColor);
     }

@@ -3,8 +3,11 @@ package client.websocket;
 import com.google.gson.Gson;
 import websocket.commands.UserGameCommand;
 import websocket.messages.ServerMessage;
+import websocket.messages.LoadGameMessage;
+import websocket.messages.ErrorMessage;
+import websocket.messages.NotificationMessage;
 
-import javax.websocket.*;
+import jakarta.websocket.*;
 import java.io.IOException;
 import java.net.URI;
 
@@ -26,7 +29,12 @@ public class WebSocketCommunicator extends Endpoint {
             this.session.addMessageHandler(new MessageHandler.Whole<String>() {
                 @Override
                 public void onMessage(String message) {
-                    ServerMessage notification = gson.fromJson(message, ServerMessage.class);
+                    ServerMessage generic = gson.fromJson(message, ServerMessage.class);
+                    ServerMessage notification = switch (generic.getServerMessageType()) {
+                        case LOAD_GAME -> gson.fromJson(message, LoadGameMessage.class);
+                        case ERROR -> gson.fromJson(message, ErrorMessage.class);
+                        case NOTIFICATION -> gson.fromJson(message, NotificationMessage.class);
+                    };
                     notificationHandler.notify(notification);
                 }
             });

@@ -22,7 +22,7 @@ public class WebSocketHandler {
 
     public void configure(WsConfig ws) {
         ws.onConnect(ctx -> {
-            System.out.println("WebSocket connected: " + ctx.getSessionId());
+            System.out.println("WebSocket connected: " + ctx.sessionId());
         });
 
         ws.onMessage(ctx -> {
@@ -36,17 +36,17 @@ public class WebSocketHandler {
         });
 
         ws.onClose(ctx -> {
-            System.out.println("WebSocket closed: " + ctx.getSessionId());
+            System.out.println("WebSocket closed: " + ctx.sessionId());
             sessionManager.removeSession(ctx);
         });
 
         ws.onError(ctx -> {
-            System.out.println("WebSocket error: " + ctx.getSessionId());
+            System.out.println("WebSocket error: " + ctx.sessionId());
             ctx.error().printStackTrace();
         });
     }
 
-    private void handleCommand(io.javalin.websocket.WsMessageContext ctx, UserGameCommand command) {
+    private void handleCommand(io.javalin.websocket.WsContext ctx, UserGameCommand command) {
         try {
             switch (command.getCommandType()) {
                 case CONNECT -> connect(ctx, command);
@@ -59,7 +59,7 @@ public class WebSocketHandler {
         }
     }
 
-    private void connect(io.javalin.websocket.WsMessageContext ctx, UserGameCommand command) throws Exception {
+    private void connect(io.javalin.websocket.WsContext ctx, UserGameCommand command) throws Exception {
         String authToken = command.getAuthToken();
         int gameID = command.getGameID();
 
@@ -93,7 +93,7 @@ public class WebSocketHandler {
         sessionManager.broadcast(gameID, notification, authToken);
     }
 
-    private void makeMove(io.javalin.websocket.WsMessageContext ctx, UserGameCommand command) throws Exception {
+    private void makeMove(io.javalin.websocket.WsContext ctx, UserGameCommand command) throws Exception {
         if (!(command instanceof websocket.commands.MakeMoveCommand moveCommand)) {
             throw new Exception("Invalid move command");
         }
@@ -159,7 +159,7 @@ public class WebSocketHandler {
             sessionManager.broadcast(gameID, new websocket.messages.NotificationMessage(opponentColor + " is in check."), null);
         }
     }
-    private void leave(io.javalin.websocket.WsMessageContext ctx, UserGameCommand command) throws Exception {
+    private void leave(io.javalin.websocket.WsContext ctx, UserGameCommand command) throws Exception {
         String authToken = command.getAuthToken();
         int gameID = command.getGameID();
 
@@ -191,7 +191,7 @@ public class WebSocketHandler {
         websocket.messages.NotificationMessage notification = new websocket.messages.NotificationMessage(message);
         sessionManager.broadcast(gameID, notification, authToken);
     }
-    private void resign(io.javalin.websocket.WsMessageContext ctx, UserGameCommand command) throws Exception {
+    private void resign(io.javalin.websocket.WsContext ctx, UserGameCommand command) throws Exception {
         String authToken = command.getAuthToken();
         int gameID = command.getGameID();
 
@@ -222,7 +222,7 @@ public class WebSocketHandler {
         sessionManager.broadcast(gameID, notification, null);
     }
 
-    private void sendError(io.javalin.websocket.WsMessageContext ctx, String message) {
+    private void sendError(io.javalin.websocket.WsContext ctx, String message) {
         try {
             ctx.send(gson.toJson(new websocket.messages.ErrorMessage("Error: " + message)));
         } catch (Exception e) {

@@ -14,7 +14,7 @@ import static ui.EscapeSequences.*;
 
 public class BoardDrawer {
     private static final int BOARD_SIZE = 8;
-    private static final String EMPTY = "   ";
+    private static final String RESET = "\u001b[0m";
 
     public static String draw(String perspective, ChessBoard board, Collection<ChessMove> validMoves) {
         StringBuilder sb = new StringBuilder();
@@ -57,17 +57,17 @@ public class BoardDrawer {
     }
 
     private static void drawHeaders(StringBuilder sb, boolean isWhite) {
-        sb.append(SET_BG_COLOR_LIGHT_GREY).append(SET_TEXT_COLOR_BLACK).append(EMPTY);
+        sb.append(SET_BG_COLOR_LIGHT_GREY).append(SET_TEXT_COLOR_BLACK).append(" ").append(EMPTY).append(" ");
         for (int col = 1; col <= BOARD_SIZE; col++) {
             int actualCol = isWhite ? col : (BOARD_SIZE - col + 1);
             char displayCol = (char) ('a' + actualCol - 1);
-            sb.append(" ").append(displayCol).append(" ");
+            sb.append("  ").append(displayCol).append("  "); 
         }
-        sb.append(EMPTY).append(SET_BG_COLOR_DARK_GREY).append(RESET_ALL).append("\n");
+        sb.append(" ").append(EMPTY).append(" ").append(SET_BG_COLOR_DARK_GREY).append(RESET).append("\n");
     }
 
     private static void drawRow(StringBuilder sb, int row, boolean isWhite, ChessBoard board, ChessPosition startPos, Set<ChessPosition> endPos) {
-        sb.append(SET_BG_COLOR_LIGHT_GREY).append(SET_TEXT_COLOR_BLACK).append(" ").append(row).append(" ");
+        sb.append(SET_BG_COLOR_LIGHT_GREY).append(SET_TEXT_COLOR_BLACK).append("  ").append(row).append("  ");
         
         for (int col = 1; col <= BOARD_SIZE; col++) {
             int actualCol = isWhite ? col : (BOARD_SIZE - col + 1);
@@ -94,30 +94,30 @@ public class BoardDrawer {
 
             ChessPiece piece = board.getPiece(currentPos);
             if (piece == null) {
-                sb.append(EMPTY);
+                sb.append(" ").append(EMPTY).append(" "); 
             } else {
                 if (piece.getTeamColor() == ChessGame.TeamColor.WHITE) {
                     sb.append(SET_TEXT_COLOR_RED);
                 } else {
                     sb.append(SET_TEXT_COLOR_BLUE);
                 }
-                sb.append(getPieceString(piece));
+                sb.append(" ").append(getPieceString(piece)).append(" ");
             }
         }
-        
-        sb.append(SET_BG_COLOR_LIGHT_GREY).append(SET_TEXT_COLOR_BLACK).append(" ").append(row).append(" ");
-        sb.append(SET_BG_COLOR_DARK_GREY).append(RESET_ALL).append("\n");
+
+        sb.append(SET_BG_COLOR_LIGHT_GREY).append(SET_TEXT_COLOR_BLACK).append("  ").append(row).append("  ");
+        sb.append(SET_BG_COLOR_DARK_GREY).append(RESET).append("\n");
     }
 
     private static String getPieceString(ChessPiece piece) {
-        String s = switch (piece.getPieceType()) {
-            case KING -> " K ";
-            case QUEEN -> " Q ";
-            case BISHOP -> " B ";
-            case KNIGHT -> " N ";
-            case ROOK -> " R ";
-            case PAWN -> " P ";
+        boolean isWhite = piece.getTeamColor() == ChessGame.TeamColor.WHITE;
+        return switch (piece.getPieceType()) {
+            case KING -> isWhite ? WHITE_KING : BLACK_KING;
+            case QUEEN -> isWhite ? WHITE_QUEEN : BLACK_QUEEN;
+            case BISHOP -> isWhite ? WHITE_BISHOP : BLACK_BISHOP;
+            case KNIGHT -> isWhite ? WHITE_KNIGHT : BLACK_KNIGHT;
+            case ROOK -> isWhite ? WHITE_ROOK : BLACK_ROOK;
+            case PAWN -> isWhite ? WHITE_PAWN : BLACK_PAWN;
         };
-        return s;
     }
 }

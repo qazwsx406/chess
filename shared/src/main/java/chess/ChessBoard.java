@@ -74,12 +74,12 @@ public class ChessBoard {
     public String toString() {
         StringBuilder sb = new StringBuilder();
 
-        for (int i = squares.length - 1; i >= 0; i--) {
+        for (int i = 7; i >= 0; i--) {
             sb.append("[");
-            for (int j = squares[i].length - 1; j >= 0; j--) {
+            for (int j = 0; j < 8; j++) {
                 sb.append(squares[i][j]);
 
-                if (j > 0) {
+                if (j < 7) {
                     sb.append(", ");
                 }
             }

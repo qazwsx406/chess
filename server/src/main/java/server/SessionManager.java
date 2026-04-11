@@ -1,6 +1,6 @@
 package server;
 
-import io.javalin.websocket.WsSession;
+import io.javalin.websocket.WsContext;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -14,20 +14,20 @@ public class SessionManager {
     private final Gson gson = new Gson();
 
     private static class SessionEntry {
-        WsSession session;
+        WsContext session;
         String authToken;
 
-        SessionEntry(WsSession session, String authToken) {
+        SessionEntry(WsContext session, String authToken) {
             this.session = session;
             this.authToken = authToken;
         }
     }
 
-    public void addSessionToGame(int gameID, String authToken, WsSession session) {
+    public void addSessionToGame(int gameID, String authToken, WsContext session) {
         gameSessions.computeIfAbsent(gameID, k -> new ArrayList<>()).add(new SessionEntry(session, authToken));
     }
 
-    public void removeSession(WsSession session) {
+    public void removeSession(WsContext session) {
         for (List<SessionEntry> entries : gameSessions.values()) {
             entries.removeIf(entry -> entry.session.equals(session));
         }
@@ -38,7 +38,7 @@ public class SessionManager {
         if (entries != null) {
             String jsonMessage = gson.toJson(message);
             for (SessionEntry entry : entries) {
-                if (entry.session.isOpen()) {
+                if (entry.session.session.isOpen()) {
                     if (excludeAuthToken == null || !entry.authToken.equals(excludeAuthToken)) {
                         entry.session.send(jsonMessage);
                     }

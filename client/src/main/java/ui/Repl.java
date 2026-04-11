@@ -23,7 +23,7 @@ public class Repl {
             try {
                 result = client.eval(line);
                 System.out.print(SET_TEXT_COLOR_BLUE + result);
-            } catch (Throwable e) {
+            } catch (Exception e) {
                 System.out.print(SET_TEXT_COLOR_RED + e.getMessage());
             }
         }
