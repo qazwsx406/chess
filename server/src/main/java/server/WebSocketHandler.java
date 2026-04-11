@@ -146,7 +146,8 @@ public class WebSocketHandler {
         websocket.messages.NotificationMessage notification = new websocket.messages.NotificationMessage(moveStr);
         sessionManager.broadcast(gameID, notification, authToken);
 
-        chess.ChessGame.TeamColor opponentColor = (userColor == chess.ChessGame.TeamColor.WHITE) ? chess.ChessGame.TeamColor.BLACK : chess.ChessGame.TeamColor.WHITE;
+        chess.ChessGame.TeamColor opponentColor = (userColor == chess.ChessGame.TeamColor.WHITE) ? 
+                chess.ChessGame.TeamColor.BLACK : chess.ChessGame.TeamColor.WHITE;
         if (game.isInCheckmate(opponentColor)) {
             game.setFinished(true);
             gameDAO.updateGame(gameData);

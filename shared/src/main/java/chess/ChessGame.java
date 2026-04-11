@@ -164,9 +164,15 @@ public class ChessGame {
             if (piece != null) {
                 if (piece.getTeamColor() != color) {
                     ChessPiece.PieceType type = piece.getPieceType();
-                    if (type == ChessPiece.PieceType.QUEEN) return true;
-                    if ((rowShift != 0 && colShift != 0) && type == ChessPiece.PieceType.BISHOP) return true;
-                    if ((rowShift == 0 || colShift == 0) && type == ChessPiece.PieceType.ROOK) return true;
+                    if (type == ChessPiece.PieceType.QUEEN) {
+                        return true;
+                    }
+                    if ((rowShift != 0 && colShift != 0) && type == ChessPiece.PieceType.BISHOP) {
+                        return true;
+                    }
+                    if ((rowShift == 0 || colShift == 0) && type == ChessPiece.PieceType.ROOK) {
+                        return true;
+                    }
                 }
                 break;
             }
